@@ -1,0 +1,290 @@
+{
+	"rooms": [{
+		"id": "winterfell",
+		"descriptions": [  {
+			"requires": ["ned stark"],
+			"text": "After a long journey, Ned Stark has finally returned home to Winterfell. \n
+Seeing the horrible rule of the Lannisters at Kings Landing, he's begun to rally \n
+forces to capture the capital. The North thanks you for your heroic deeds. Excellent work!"
+		},{
+			"requires": ["john snow","theon grayjoy"],
+			"text": "This is Winterfell, home to the most noble family in all of Westeros - The Starks. \n
+War and conflict plagues the seven kingdoms, and Ned Stark has been captured at Kings Landing. \n
+Head South and bring him home!"
+		},{
+			"requires": [],
+			"text": "This is Winterfell, home to the most noble family in all of Westeros - The Starks. \n
+War and conflict plagues the seven kingdoms, and Ned Stark has been captured at Kings Landing. \n
+We must bring him home! To begin, find John Snow at Castle Black (north) to help you on your journey. \n
+There may also be a place of interest to the east, and a crossing to kings landing to the south."
+		}],
+		"points": 0,
+		"exits": [{
+			"direction": "north",
+			"room_id": "castle black",
+			"keys": ["sword"]
+		},{
+			"direction": "east",
+			"room_id": "iron islands",
+			"keys": []
+		},{
+			"direction": "south",
+			"room_id": "the twins",
+			"keys": ["sword"]
+		}],
+		"treasure": ["ned stark"]
+	}, {
+		"id": "castle black",
+		"descriptions": [{
+			"requires": [],
+			"text": "You arrived at Castle Black: headquarters of the brave warriors of the Night's Watch. \n
+It is a dark and chilling home, yet the fighters do whatever it takes to defend The Wall. \n
+You should hand them the scroll you found at Winterfell to help them win their battle \n
+against the whitewalkers. You catch a glimpse of the coast a few hundred miles to the west."
+		}],
+		"points": 100,
+		"exits": [{
+			"direction": "south",
+			"room_id": "winterfell",
+			"keys": []
+		}, {
+			"direction": "west",
+			"room_id": "stony shore",
+			"keys": []
+		}],
+		"treasure": ["whitewalker scroll"]
+	},{
+		"id": "stony shore",
+		"descriptions": [{
+			"requires": ["treasure map"],
+			"text": "We are back at Stony Shore, but with a treasure map! \n
+Place it quick to find some treasure!"
+		},{
+			"requires": [],
+			"text": "A few days journey led you to Stony Shore, a sparsely populated \n
+coastal region that centers around fishing villages. You've heard of the treasures \n
+hidden on these shores. Look around for items that may help!."
+		}],
+		"points": 100,
+		"exits": [{
+			"direction": "east",
+			"room_id": "castle black",
+			"keys": []
+		}],
+		"treasure": ["treasure map"]
+	}, {
+		"id": "iron islands",
+		"descriptions": [{
+			"requires": [],
+			"text": "A long boat ride led you to The Iron Islands, home to the fierce \n
+seafaring people who call themselves the ironborn. It is often said that \n
+every captain is a king aboard his own ship, and so the islands are also \n
+called The Land of Ten Thousand Kings. It is rumoured the Theon Grayjoy \n
+lives in these parts - he might be able to help us at King's Landing!"
+		}],
+		"points": 50,
+		"exits": [{
+			"direction": "west",
+			"room_id": "winterfell",
+			"keys": []
+		}],
+		"treasure": []
+	}, {
+		"id": "the twins",
+		"descriptions": [{
+			"requires": ["ned stark"],
+			"text": "House Fray lets you pass their land with Ned Stark. But they won't \n
+be so forgiving next time!"
+		},{
+			"requires": ["army","sword","john snow","theon grayjoy"],
+			"text": "You're back at the Twins, but this time with the necessary forces \n
+to enter Kings Landing. What are you waiting for? Head south and rescue Ned Stark!"
+		},{
+			"requires": ["food","water"],
+			"text": "You've arrived at the Twins, a massive castle belonging to House Frey. \n
+The Twins represents the only crossing point over the Green Fork for hundreds \n
+of miles in either direction, and so it is a major barrier to travelers \n
+and merchants traveling from the North to the South of Westeros.\n
+House Frey is always in need of more warriors. \n
+King's landing lies just to the South, but you do not have the necessary forces to enter. \n
+There are some villagers to the west who are desperate for food and water!"
+		}, {
+			"requires": [],
+			"text": "You've arrived at the Twins, a massive castle belonging to House Frey. \n
+The Twins represents the only crossing point over the Green Fork for hundreds \n
+of miles in either direction, and so it is a major barrier to travelers \n
+and merchants traveling from the North to the South of Westeros.\n
+House Frey is always in need of more warriors. \n
+King's landing lies just to the South, but you do not have the necessary forces to enter. \n
+The villagers to the west are starving! Bring them some food \n
+and water from Winterfell."
+		}],
+		"points": 100,
+		"exits": [{
+			"direction": "south",
+			"room_id": "kings landing",
+			"keys": ["army","sword","john snow","theon grayjoy"]
+		}, {
+			"direction": "west",
+			"room_id": "wendish town",
+			"keys": []
+		}, {
+			"direction": "north",
+			"room_id": "winterfell",
+			"keys": []
+		}],
+		"treasure": ["warriors"]
+	}, {
+		"id": "wendish town",
+		"descriptions": [{
+			"requires": ["food","water"],
+			"text": "You've stumbled upon Wendish Town, a small, quite village \n
+with a timbered holdfast in the riverlands. Casterly Rock is only 40 miles west \n
+of this town, and only a well-equipped John Snow will be allowed to enter \n
+the citadel. However, the villagers are starving; give them your food and water!"
+		}, {
+			"requires": [],
+			"text": "You've stumbled upon Wendish Town, a small, quite village \n
+with a timbered holdfast in the riverlands. Casterly Rock is only 40 miles west \n
+of this town, and only a well-equipped John Snow will be allowed to enter \n
+the citadel. However, the villagers are starving; get some water from the Iron Islands \n
+and feed them from Casterly Rock!"
+		}],
+		"points": 50,
+		"exits": [{
+			"direction": "east",
+			"room_id": "the twins",
+			"keys": []
+		}, {
+			"direction": "west",
+			"room_id": "casterly rock",
+			"keys": ["sword","john snow"]
+		}],
+		"treasure": ["food","water"]
+	},{
+		"id": "casterly rock",
+		"descriptions": [{
+			"requires": ["gold"],
+			"text": "You walk through the gold-plated gates of Casterly Rock, the ancestral \n
+stronghold of House Lannister. Located on a rocky cliff overlooking \n
+the sea, it is home to a major goldmine that provides its residents \n
+with incredible wealth. The Lannisters are waiting for their payment. \n
+Give them your gold!"
+		}, {
+			"requires": [],
+			"text": "You walk through the gold-plated gates of Casterly Rock, the ancestral \n
+stronghold of House Lannister. Located on a rocky cliff overlooking \n
+the sea, it is home to a major goldmine that provides its residents \n
+with incredible wealth. The Lannisters hold a massive army, one that may \n
+be able to break into Kings Landing - but a payment in gold will surely \n
+reward you nicely!"
+		}],
+		"points": 500,
+		"exits": [{
+			"direction": "east",
+			"room_id": "wendish town",
+			"keys": []
+		}],
+		"treasure": ["gold"]
+	}, {
+		"id": "kings landing",
+		"descriptions": [{
+			"requires": [],
+			"text": "At last! You've arrived at Kings Landing! This region is the largest city \n
+and the capital of the Seven Kingdoms. In it lays the Iron Throne, \n
+the seat of the King of the Andals and the First Men; it is said that he who \n
+controls the Iron Throne controls the Seven Kingdoms! A Lannister child now sits \n
+on that throne, and he's taken Ned Stark in attempt to weaken the North. \n
+Quickly, lay your army - and grab our leader to bring him home!"
+		}],
+		"points": 2000,
+		"exits": [{
+			"direction": "north",
+			"room_id": "the twins",
+			"keys": []
+		}],
+		"treasure": ["army"]
+	}],
+	"start_room": "winterfell",
+	"items": [{
+		"id": "sword",
+		"description": "John Snow's trusty weapon",
+		"points": 0
+	}, {
+		"id": "whitewalker scroll",
+		"description": "Scroll containing critical information to defeating the whitewalkers",
+		"points": 250
+	}, {
+		"id": "john snow",
+		"description": "Son of Lyanna Stark and Rhaegar Targaryen; Bastard of Winterfell",
+		"points": 0
+	}, {
+		"id": "warriors",
+		"description": "a band of mercenaries that will fight anything, for a price",
+		"points": 500
+	}, {
+		"id": "gold",
+		"description": "A chest of golden coins",
+		"points": 1000
+	},{
+		"id": "water",
+		"description": "20 jugs of water",
+		"points": 5000
+	},{
+		"id": "theon grayjoy",
+		"description": "Son of the leader of the Ironborn; friend of John Snow",
+		"points": 0
+	},{
+		"id": "treasure map",
+		"description": "A treasure map that points to the coast",
+		"points": 3000
+	},{
+		"id": "army",
+		"description": "A sizeable Lannister army",
+		"points": 5000
+	},{
+		"id": "food",
+		"description": "A caravan filled with meats, bread, and vegetable",
+		"points": 5000
+	},{
+		"id": "ned stark",
+		"description": "The King of the North",
+		"points": 50000
+	}],
+	"start_inv": [],
+	"start_locations": [{
+		"room": "winterfell",
+		"item": "sword"
+	}, {
+		"room": "winterfell",
+		"item": "whitewalker scroll"
+	}, {
+		"room": "castle black",
+		"item": "john snow"
+	}, {
+		"room": "stony shore",
+		"item": "warriors"
+	},{
+		"room": "stony shore",
+		"item": "gold"
+	},{
+		"room": "iron islands",
+		"item": "theon grayjoy"
+	},{
+		"room": "iron islands",
+		"item": "water"
+	},{
+		"room": "wendish town",
+		"item": "treasure map"
+	},{
+		"room": "casterly rock",
+		"item": "army"
+	},{
+		"room": "casterly rock",
+		"item": "food"
+	},{
+		"room": "kings landing",
+		"item": "ned stark"
+	}],
+	"win_message": "Great job! You've completed the main story and all of its sidequests!"
+}
