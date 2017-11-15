@@ -15,5 +15,7 @@ type continent
 type card
 
 (* A [player] represents a player playing the game. It contains a player's ID,
-   countries occupied, continents occupied, number of troops, and score. *)
+   countries occupied, continents occupied, number of troops, and score. It will
+   also contain information of whether the specific player is an AI or a human.
+*)
 type player
