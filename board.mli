@@ -1,9 +1,14 @@
+(* A [board] is a graph of countries where countries that border each other are
+ * connected on the graph. *)
+type board
+
 (* A [country] is a record representing each individual country on the board.
    It contains a country's ID, bordering countries, number of troops,
    ID of player occupying, and its continent. *)
 type country
 
-(* A [continent] is a list of countries that are part of this continent *)
+(* A [continent] is a list of countries that are part of this continent, and the
+   continent's ID. *)
 type continent
 
 (* A [card] is either of type Circle, Square, or Triangle. *)
