@@ -1,7 +1,8 @@
 open Board
-open State
 
-type attack_command = FalseAttack | Attack of (string*string)
+type loser = Left|Right|Both
+
+type attack_command = FalseAttack | Attack of (string*string*loser*int)
 
 type fortify_command = FalseFortify | Fortify of string
 
@@ -11,13 +12,17 @@ type pass_command = unit
 
 (* type card = Circle|Triangle|Square *)
 
+
 type trade_command = NoTrade | Same of card | Different
 
-let rec attack_helper attacker defender player countries good_attacker good_defender =
+
+                       (*************************************
+
+let rec attack_helper attacker defender player countries good_attacker good_defender : attack_command =
   match countries with
   | [] -> if (good_attacker && good_defender) then Attack (attacker, defender) else FalseAttack
-  | (c, p, i) :: t -> if (c = attacker && p = player) then attack_helper attacker defender player t true good_defender
-    else if (c = defender && p <> player) then attack_helper attacker defender player t good_attacker true
+  | (c, p, i) :: t -> if (c.country_id = attacker && p.player_id = player) then attack_helper attacker defender player t true good_defender
+    else if (c.country_id = defender && p.player_id <> player) then attack_helper attacker defender player t good_attacker true
     else attack_helper attacker defender player t good_attacker good_defender
 
 let make_attack_command attacker defender st =
@@ -28,7 +33,7 @@ let make_attack_command attacker defender st =
 let rec fortify_helper country player country_list =
   match country_list with
   | [] -> FalseFortify
-  | (c, p, i)::t -> if (c = country && p = player) then Fortify (country)
+  | (c, p, i)::t -> if (c.country_id = country && p.player_id = player) then Fortify (country)
     else fortify_helper country player t
 
 let make_fortify_command from_country st =
@@ -39,7 +44,7 @@ let make_fortify_command from_country st =
 let rec reinforce_helper country player country_list =
   match country_list with
   | [] -> FalseReinforce
-  | (c, p, i)::t -> if (c = country && p = player) then Reinforce (country)
+  | (c, p, i)::t -> if (c.country_id = country && p.player_id = player) then Reinforce (country)
     else reinforce_helper country player t
 
 let make_reinforce_command to_country st =
@@ -74,4 +79,4 @@ let make_trade_command st =
   let diff = three_diff cards 0 0 0 in
   if (fst same) then Same (snd same)
   else if (diff) then Different
-  else NoTrade
+  else NoTrade *)

@@ -1,14 +1,18 @@
+open Board
+
 (*[point] is a point on the users screen *)
 (* type point *)
 
 (* [command] represents a command input by a player. *)
-type attack_command = (string*string)
+type loser = Left|Right|Both
 
-type reinforce_command = string
+type attack_command = FalseAttack | Attack of (string*string*loser*int)
 
-type fortify_command = string
+type reinforce_command = FalseReinforce | Reinforce of string
 
-type trade_command
+type fortify_command = FalseFortify | Fortify of string
+
+type trade_command = NoTrade | Same of card | Different
 
 type pass_command = unit
 
