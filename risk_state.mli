@@ -9,24 +9,24 @@ val init_state : Board.board -> Board.player list -> state
 
 (* [trade_in cmd st] is the state that results after processing command cmd
  * [trade_in] allows the player to redeem cards for additional troops *)
-val trade_in : Command.command -> state -> state
+val trade_in : Command.trade_command -> state -> state
 
 (* [reinforce cmd st] is the state that results after processing command cmd
- * [reinforce] adds troops to a country of a player's choice, so long as the
+ * [reinforce] adds troops to a country of a player's choice, so long as he
  * owns that country *)
-val reinforce : Command.command -> state -> state
+val reinforce : Command.reinforce_command -> state -> state
 
 (* [attack cmd st] is the state that results after processing command cmd
  * [attack] allows the player to select a country to attack an opponent's
  * country using a randogm dice-rolling system *)
-val attack : Command.command -> state -> state
+val attack : Command.attack_command -> state -> state
 
 (* [fortify cmd st] is the state that results after processing command cmd
  * [fortify] allows the player to move troops from one country to another
  * country reachable from the first country through adjacent bordering countries *)
-val fortify : Command.command -> state -> state
+val fortify : Command.fortify_command -> state -> state
 
 (* [pass cmd st] is the state that results after processing command cmd
  * [pass] allows the user to do nothing during his or her turn, or to signal the
  * end of a turn *)
-val pass : Command.commmand -> state -> state
+val pass : Command.pass_command -> state -> state
