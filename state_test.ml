@@ -1,24 +1,164 @@
 open OUnit2
-open State
+open Risk_state
 open Command
+open Board
 
-let j = Yojson.Basic.from_file "threerooms.json"
-let j2 = Yojson.Basic.from_file "oneroom.json"
-let gotj = Yojson.Basic.from_file "GameOfThronesAdventure.json"
-let quitCommand = parse "quit"
-let lookCommand = parse "look"
-let invCommand = parse "inv"
-let takeCommand = parse "take black hat"
-let dropCommand = parse "drop white hat"
-let scoreCommand = parse "score"
-let turnsCommand = parse "turns"
-let goCommand = parse "go room2"
-let invalidCommand = parse "ergopo4pj4rpoj24 24pjr42pi4"
+let p1 = {
+  player_id = "player 1";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  score = 0;
+}
 
-let tests =
-[
+let p2 = {
+  player_id = "player 2";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  score = 0;
+}
+
+let p3 = {
+  player_id = "player 3";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  score = 0;
+}
+
+let p4 = {
+  player_id = "player 4";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  score = 0;
+}
+
+let players = [p1;p2;p3;p4]
+
+let country1 = {
+  country_id = "USA";
+  bordering_countries = ["Canada";"Mexico"]
+}
+
+let country2 = {
+  country_id = "Canada";
+  bordering_countries = ["USA"]
+}
+
+let country3 = {
+  country_id = "Mexico";
+  bordering_countries = ["USA"]
+}
+
+let country4 = {
+  country_id = "Cuba";
+  bordering_countries = ["USA";"Mexico"]
+}
+
+let continent = {
+  countries = [country1; country2; country3; country4];
+  id = "North America";
+  bonus = 5;
+}
+
+let board = [continent]
+
+let state = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  occupied_continents = [];
+  board = board;
+}
+
+let state2 = {
+  num_players = 4;
+  player_turn = p2;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  occupied_continents = [];
+  board = board;
+}
+
+let state3 = {
+  num_players = 4;
+  player_turn = p3;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  occupied_continents = [];
+  board = board;
+}
+
+let state4 = {
+  num_players = 4;
+  player_turn = p4;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  occupied_continents = [];
+  board = board;
+}
+
+let before_attack = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [(country1, p1, 3);(country2, p2, 4);(country3, p3, 2)];
+  occupied_continents = [];
+  board = board;
+}
+
+let after_attack = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [(country1, p1, 2);(country2, p1, 1);(country3, p3, 2)];
+  occupied_continents = [];
+  board = board;
+}
+
+let reinforced_one = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [(country1, p1, 1)];
+  occupied_continents = [];
+  board = board;
+}
+
+let attack_command = Attack ("USA","Canada",Right,-4)
+
+let reinforce_begin_command = Reinforce "USA"
+
+let reinforce_begin_command2 = Reinforce "Cuba"
+
+let tests =[
+  "init_state" >:: (fun _ -> assert_equal state (init_state 4 players));
+  "next player" >:: (fun _ -> assert_equal state (state |> next_player |> next_player |> next_player |> next_player));
+  "next player2" >:: (fun _ -> assert_equal state2 (state |> next_player));
+  "next player3" >:: (fun _ -> assert_equal state3 (init_state 4 players |> next_player |> next_player));
+  "attack 1" >:: (fun _ -> assert_equal after_attack (attack attack_command before_attack));
+  "reinforce first" >:: (fun _ -> assert_equal reinforced_one (init_state 4 players |> reinforce_begin reinforce_begin_command))
+
+
   (* tests init_state function to see if all values are initialized properly for "threeroom.json"*)
-  "1: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> win_score));
+  (* "1: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> win_score));
   "1: start_score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> score));
   "1: start_turns" >:: (fun _ -> assert_equal 0 (j |> init_state |> turns));
   "1: start_room" >:: (fun _ -> assert_equal "room1" (j |> init_state |> current_room_id));
@@ -144,7 +284,7 @@ let tests =
   "9: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
                                                 ("room1", "red hat");
                                                 ("room1", "black hat")]
-                              (j |> init_state |> do' goCommand |> locations));
+                              (j |> init_state |> do' goCommand |> locations));*)
 ]
 
 let suite =
