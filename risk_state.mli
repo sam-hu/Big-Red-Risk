@@ -10,7 +10,7 @@ type state = {
   active_players: player list;
   reward: int;
   occupied_countries: (country*player*int) list;
-  occupied_continents: (continent*player) list;
+  player_continents: continent list;
   board: board;
 }
 
@@ -59,3 +59,9 @@ val reinforce_begin: Command.reinforce_command -> state -> state
 val give_troops: state -> state
 
 val get_num_troops: string -> (Board.country * Board.player * int) list -> int
+
+val build_continent_list: state -> state
+
+val give_card: state -> state -> state
+
+val init_reinforce_command: string -> state -> Command.reinforce_command

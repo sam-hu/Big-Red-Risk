@@ -962,6 +962,7 @@ def color_rgb(r,g,b):
     Returns color specifier string for the resulting color"""
     return "#%02x%02x%02x" % (r,g,b)
 
+################################
 
 ### Risk: Final Project Code ###
 
@@ -982,7 +983,7 @@ countriesDict = {"Country one":(Rectangle(Point(30,30),Point(40,40)),Text(Point(
                 "Country two":(Rectangle(Point(60,30),Point(70,40)),Text(Point(65,35),'-')),
                 "Country three":(Rectangle(Point(45,60),Point(55,70)),Text(Point(50,65),'-'))}
 
-def drawBoard(playerIDString):
+def drawBoard():
     # Set up window
     win = GraphWin("Risk: Board Game", 1200, 800)
     win.setCoords(0,0,100,100) # 100 by 100 grid
@@ -1002,7 +1003,7 @@ def drawBoard(playerIDString):
     line2.draw(win)
     line3 = Line(Point(40,35),Point(60,35))
     line3.draw(win)
-    
+
     # Draw the countries
     countriesDict["Country one"][0].setFill("gray")
     countriesDict["Country one"][0].draw(win)
@@ -1093,7 +1094,8 @@ turns, diceResults, currentPlayersTurn):
 
     # Display card amounts for each player
     for cardTuple in cardAmounts:
-        playerCards[cardTuple[0]].setText(cardTuple[1])
+        g = playerCards[cardTuple[0]]
+        g.setText(cardTuple[1])
 
     # Highlights the country/button most recently clicked
     if (inputTuple[1] == True): # Deals with countries
@@ -1114,6 +1116,56 @@ turns, diceResults, currentPlayersTurn):
         # Highlight end turn button
         endTurnButton.setOutline("white")
         endTurnButton.setWidth(4)
+
+
+    cashCardReward.setText("Cash card reward is " + str(cashReward))
+    turnsTaken.setText("Turns taken: " + str(turns))
+    diceResultLabel.setText("Attacker rolled "+str(diceResults[0]) +
+    "\n Defender rolled " + str(diceResults[1]))
+
+def updateBoardNoClick(win, occupiedCountries, cardAmounts, cashReward,
+turns, diceResults, currentPlayersTurn):
+
+    # Set notification bar to current click
+    #notificationBar.setText(inputTuple)
+
+
+    # Highlight the label of the player whose current turn it is
+    # for playerLabelTuple in playerNameLabels:
+    #     if playerLabelTuple[1] == currentPlayersTurn:
+    #         playerLabelTuple[0].setFill("green")
+    #     elif playerLabelTuple[1] != currentPlayersTurn and inputTuple[1] == True:
+    #         playerLabelTuple[0].setFill("gray")
+
+    # Color board according to what players own and add troops to each country
+    for countryTuple in occupiedCountries:
+        countriesDict[countryTuple[0]][0].setFill(playerIDDict[countryTuple[1]])
+        countriesDict[countryTuple[0]][1].setText(countryTuple[2])
+
+    # Display card amounts for each player
+    for cardTuple in cardAmounts:
+        g = playerCards[cardTuple[0]]
+        g.setText(cardTuple[1])
+
+    # Highlights the country/button most recently clicked
+    # if (inputTuple[1] == True): # Deals with countries
+    #     # Set all other countries/buttons to black outline
+    #     for key in countriesDict:
+    #         countriesDict[key][0].setOutline("black")
+    #         countriesDict[key][0].setWidth(1)
+    #     endTurnButton.setOutline("black")
+    #     endTurnButton.setWidth(1)
+    #     # Highlight the country selected
+    #     countriesDict[inputTuple[0]][0].setOutline("white")
+    #     countriesDict[inputTuple[0]][0].setWidth(6)
+    # elif inputTuple[0] == "End turn": # Deals with end turn button
+    #     # Set all other countries/buttons to black outline
+    #     for key in countriesDict:
+    #         countriesDict[key][0].setOutline("black")
+    #         countriesDict[key][0].setWidth(1)
+    #     # Highlight end turn button
+    #     endTurnButton.setOutline("white")
+    #     endTurnButton.setWidth(4)
 
 
     cashCardReward.setText("Cash card reward is " + str(cashReward))
