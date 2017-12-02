@@ -1,5 +1,5 @@
 # graphics.py
-"""Simple object oriented graphics library  
+"""Simple object oriented graphics library
 
 The library is designed to make it very easy for novice programmers to
 experiment with computer graphics in an object oriented fashion. It is
@@ -161,6 +161,7 @@ __version__ = "5.0"
 #     Added Entry boxes.
 
 import time, os, sys
+from itertools import cycle
 
 try:  # import as appropriate for 2.x vs. 3.x
    import tkinter as tk
@@ -202,7 +203,7 @@ def update(rate=None):
 
 ############################################################################
 # Graphics classes start here
-        
+
 class GraphWin(tk.Canvas):
 
     """A GraphWin is a toplevel window for displaying graphics."""
@@ -243,7 +244,7 @@ class GraphWin(tk.Canvas):
 
     def __str__(self):
         return repr(self)
-     
+
     def __checkOpen(self):
         if self.closed:
             raise GraphicsError("window is closed")
@@ -257,7 +258,7 @@ class GraphWin(tk.Canvas):
         self.__checkOpen()
         self.config(bg=color)
         self.__autoflush()
-        
+
     def setCoords(self, x1, y1, x2, y2):
         """Set coordinates of window to run from (x1,y1) in the
         lower-left corner to (x2,y2) in the upper-right corner."""
@@ -285,26 +286,26 @@ class GraphWin(tk.Canvas):
         if self.autoflush:
             _root.update()
 
-    
+
     def plot(self, x, y, color="black"):
         """Set pixel (x,y) to the given color"""
         self.__checkOpen()
         xs,ys = self.toScreen(x,y)
         self.create_line(xs,ys,xs+1,ys, fill=color)
         self.__autoflush()
-        
+
     def plotPixel(self, x, y, color="black"):
         """Set pixel raw (independent of window coordinates) pixel
         (x,y) to color"""
         self.__checkOpen()
         self.create_line(x,y,x+1,y, fill=color)
         self.__autoflush()
-      
+
     def flush(self):
         """Update drawing to the window"""
         self.__checkOpen()
         self.update_idletasks()
-        
+
     def getMouse(self):
         """Wait for mouse click and return Point object representing
         the click"""
@@ -354,32 +355,32 @@ class GraphWin(tk.Canvas):
         key = self.lastKey
         self.lastKey = ""
         return key
-            
+
     def getHeight(self):
         """Return the height of the window"""
         return self.height
-        
+
     def getWidth(self):
         """Return the width of the window"""
         return self.width
-    
+
     def toScreen(self, x, y):
         trans = self.trans
         if trans:
             return self.trans.screen(x,y)
         else:
             return x,y
-                      
+
     def toWorld(self, x, y):
         trans = self.trans
         if trans:
             return self.trans.world(x,y)
         else:
             return x,y
-        
+
     def setMouseHandler(self, func):
         self._mouseCallback = func
-        
+
     def _onClick(self, e):
         self.mouseX = e.x
         self.mouseY = e.y
@@ -397,12 +398,12 @@ class GraphWin(tk.Canvas):
             item.undraw()
             item.draw(self)
         self.update()
-        
-                      
+
+
 class Transform:
 
     """Internal class for 2-D coordinate transformations"""
-    
+
     def __init__(self, w, h, xlow, ylow, xhigh, yhigh):
         # w, h are width and height of window
         # (xlow,ylow) coordinates of lower-left [raw (0,h-1)]
@@ -413,13 +414,13 @@ class Transform:
         self.ybase = yhigh
         self.xscale = xspan/float(w-1)
         self.yscale = yspan/float(h-1)
-        
+
     def screen(self,x,y):
         # Returns x,y in screen (actually window) coordinates
         xs = (x-self.xbase) / self.xscale
         ys = (self.ybase-y) / self.yscale
         return int(xs+0.5),int(ys+0.5)
-        
+
     def world(self,xs,ys):
         # Returns xs,ys in world coordinates
         x = xs*self.xscale + self.xbase
@@ -442,11 +443,11 @@ class GraphicsObject:
     """Generic base class for all of the drawable objects"""
     # A subclass of GraphicsObject should override _draw and
     #   and _move methods.
-    
+
     def __init__(self, options):
         # options is a list of strings indicating which options are
         # legal for this object.
-        
+
         # When an object is drawn, canvas is set to the GraphWin(canvas)
         #    object where it is drawn and id is the TK identifier of the
         #    drawn shape.
@@ -458,15 +459,15 @@ class GraphicsObject:
         for option in options:
             config[option] = DEFAULT_CONFIG[option]
         self.config = config
-        
+
     def setFill(self, color):
         """Set interior color to color"""
         self._reconfig("fill", color)
-        
+
     def setOutline(self, color):
         """Set outline color to color"""
         self._reconfig("outline", color)
-        
+
     def setWidth(self, width):
         """Set line weight to width"""
         self._reconfig("width", width)
@@ -487,12 +488,12 @@ class GraphicsObject:
             _root.update()
         return self
 
-            
+
     def undraw(self):
 
         """Undraw the object (i.e. hide it). Returns silently if the
         object is not currently drawn."""
-        
+
         if not self.canvas: return
         if not self.canvas.isClosed():
             self.canvas.delete(self.id)
@@ -507,13 +508,13 @@ class GraphicsObject:
 
         """move object dx units in x direction and dy units in y
         direction"""
-        
+
         self._move(dx,dy)
         canvas = self.canvas
         if canvas and not canvas.isClosed():
             trans = canvas.trans
             if trans:
-                x = dx/ trans.xscale 
+                x = dx/ trans.xscale
                 y = -dy / trans.yscale
             else:
                 x = dx
@@ -521,7 +522,7 @@ class GraphicsObject:
             self.canvas.move(self.id, x, y)
             if canvas.autoflush:
                 _root.update()
-           
+
     def _reconfig(self, option, setting):
         # Internal method for changing configuration of the object
         # Raises an error if the option does not exist in the config
@@ -546,7 +547,7 @@ class GraphicsObject:
         """updates internal state of object to move it dx,dy units"""
         pass # must override in subclass
 
-         
+
 class Point(GraphicsObject):
     def __init__(self, x, y):
         GraphicsObject.__init__(self, ["outline", "fill"])
@@ -556,27 +557,27 @@ class Point(GraphicsObject):
 
     def __repr__(self):
         return "Point({}, {})".format(self.x, self.y)
-        
+
     def _draw(self, canvas, options):
         x,y = canvas.toScreen(self.x,self.y)
         return canvas.create_rectangle(x,y,x+1,y+1,options)
-        
+
     def _move(self, dx, dy):
         self.x = self.x + dx
         self.y = self.y + dy
-        
+
     def clone(self):
         other = Point(self.x,self.y)
         other.config = self.config.copy()
         return other
-                
+
     def getX(self): return self.x
     def getY(self): return self.y
 
 class _BBox(GraphicsObject):
     # Internal base class for objects represented by bounding box
     # (opposite corners) Line segment is a degenerate case.
-    
+
     def __init__(self, p1, p2, options=["outline","width","fill"]):
         GraphicsObject.__init__(self, options)
         self.p1 = p1.clone()
@@ -587,32 +588,32 @@ class _BBox(GraphicsObject):
         self.p1.y = self.p1.y + dy
         self.p2.x = self.p2.x + dx
         self.p2.y = self.p2.y  + dy
-                
+
     def getP1(self): return self.p1.clone()
 
     def getP2(self): return self.p2.clone()
-    
+
     def getCenter(self):
         p1 = self.p1
         p2 = self.p2
         return Point((p1.x+p2.x)/2.0, (p1.y+p2.y)/2.0)
 
-    
+
 class Rectangle(_BBox):
-    
+
     def __init__(self, p1, p2):
         _BBox.__init__(self, p1, p2)
 
     def __repr__(self):
         return "Rectangle({}, {})".format(str(self.p1), str(self.p2))
-    
+
     def _draw(self, canvas, options):
         p1 = self.p1
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
         return canvas.create_rectangle(x1,y1,x2,y2,options)
-        
+
     def clone(self):
         other = Rectangle(self.p1, self.p2)
         other.config = self.config.copy()
@@ -620,28 +621,28 @@ class Rectangle(_BBox):
 
 
 class Oval(_BBox):
-    
+
     def __init__(self, p1, p2):
         _BBox.__init__(self, p1, p2)
 
     def __repr__(self):
         return "Oval({}, {})".format(str(self.p1), str(self.p2))
 
-        
+
     def clone(self):
         other = Oval(self.p1, self.p2)
         other.config = self.config.copy()
         return other
-   
+
     def _draw(self, canvas, options):
         p1 = self.p1
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
         return canvas.create_oval(x1,y1,x2,y2,options)
-    
+
 class Circle(Oval):
-    
+
     def __init__(self, center, radius):
         p1 = Point(center.x-radius, center.y-radius)
         p2 = Point(center.x+radius, center.y+radius)
@@ -650,18 +651,18 @@ class Circle(Oval):
 
     def __repr__(self):
         return "Circle({}, {})".format(str(self.getCenter()), str(self.radius))
-        
+
     def clone(self):
         other = Circle(self.getCenter(), self.radius)
         other.config = self.config.copy()
         return other
-        
+
     def getRadius(self):
         return self.radius
 
-                  
+
 class Line(_BBox):
-    
+
     def __init__(self, p1, p2):
         _BBox.__init__(self, p1, p2, ["arrow","fill","width"])
         self.setFill(DEFAULT_CONFIG['outline'])
@@ -674,22 +675,22 @@ class Line(_BBox):
         other = Line(self.p1, self.p2)
         other.config = self.config.copy()
         return other
-  
+
     def _draw(self, canvas, options):
         p1 = self.p1
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
         return canvas.create_line(x1,y1,x2,y2,options)
-        
+
     def setArrow(self, option):
         if not option in ["first","last","both","none"]:
             raise GraphicsError(BAD_OPTION)
         self._reconfig("arrow", option)
-        
+
 
 class Polygon(GraphicsObject):
-    
+
     def __init__(self, *points):
         # if points passed as a list, extract it
         if len(points) == 1 and type(points[0]) == type([]):
@@ -699,7 +700,7 @@ class Polygon(GraphicsObject):
 
     def __repr__(self):
         return "Polygon"+str(tuple(p for p in self.points))
-        
+
     def clone(self):
         other = Polygon(*self.points)
         other.config = self.config.copy()
@@ -711,7 +712,7 @@ class Polygon(GraphicsObject):
     def _move(self, dx, dy):
         for p in self.points:
             p.move(dx,dy)
-   
+
     def _draw(self, canvas, options):
         args = [canvas]
         for p in self.points:
@@ -719,10 +720,10 @@ class Polygon(GraphicsObject):
             args.append(x)
             args.append(y)
         args.append(options)
-        return GraphWin.create_polygon(*args) 
+        return GraphWin.create_polygon(*args)
 
 class Text(GraphicsObject):
-    
+
     def __init__(self, p, text):
         GraphicsObject.__init__(self, ["justify","fill","text","font"])
         self.setText(text)
@@ -732,15 +733,15 @@ class Text(GraphicsObject):
 
     def __repr__(self):
         return "Text({}, '{}')".format(self.anchor, self.getText())
-    
+
     def _draw(self, canvas, options):
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
         return canvas.create_text(x,y,options)
-        
+
     def _move(self, dx, dy):
         self.anchor.move(dx,dy)
-        
+
     def clone(self):
         other = Text(self.anchor, self.config['text'])
         other.config = self.config.copy()
@@ -748,10 +749,10 @@ class Text(GraphicsObject):
 
     def setText(self,text):
         self._reconfig("text", text)
-        
+
     def getText(self):
         return self.config["text"]
-            
+
     def getAnchor(self):
         return self.anchor.clone()
 
@@ -832,13 +833,13 @@ class Entry(GraphicsObject):
     def setText(self, t):
         self.text.set(t)
 
-            
+
     def setFill(self, color):
         self.fill = color
         if self.entry:
             self.entry.config(bg=color)
 
-            
+
     def _setFontComponent(self, which, value):
         font = list(self.font)
         font[which] = value
@@ -874,8 +875,8 @@ class Entry(GraphicsObject):
 class Image(GraphicsObject):
 
     idCount = 0
-    imageCache = {} # tk photoimages go here to avoid GC while drawn 
-    
+    imageCache = {} # tk photoimages go here to avoid GC while drawn
+
     def __init__(self, p, *pixmap):
         GraphicsObject.__init__(self, [])
         self.anchor = p.clone()
@@ -889,16 +890,16 @@ class Image(GraphicsObject):
 
     def __repr__(self):
         return "Image({}, {}, {})".format(self.anchor, self.getWidth(), self.getHeight())
-                
+
     def _draw(self, canvas, options):
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
-        self.imageCache[self.imageId] = self.img # save a reference  
+        self.imageCache[self.imageId] = self.img # save a reference
         return canvas.create_image(x,y,image=self.img)
-    
+
     def _move(self, dx, dy):
         self.anchor.move(dx,dy)
-        
+
     def undraw(self):
         try:
             del self.imageCache[self.imageId]  # allow gc of tk photoimage
@@ -908,7 +909,7 @@ class Image(GraphicsObject):
 
     def getAnchor(self):
         return self.anchor.clone()
-        
+
     def clone(self):
         other = Image(Point(0,0), 0, 0)
         other.img = self.img.copy()
@@ -918,7 +919,7 @@ class Image(GraphicsObject):
 
     def getWidth(self):
         """Returns the width of the image in pixels"""
-        return self.img.width() 
+        return self.img.width()
 
     def getHeight(self):
         """Returns the height of the image in pixels"""
@@ -929,37 +930,205 @@ class Image(GraphicsObject):
         r,g,b are in range(256)
 
         """
-        
-        value = self.img.get(x,y) 
+
+        value = self.img.get(x,y)
         if type(value) ==  type(0):
             return [value, value, value]
         elif type(value) == type((0,0,0)):
             return list(value)
         else:
-            return list(map(int, value.split())) 
+            return list(map(int, value.split()))
 
     def setPixel(self, x, y, color):
         """Sets pixel (x,y) to the given color
-        
+
         """
         self.img.put("{" + color +"}", (x, y))
-        
+
 
     def save(self, filename):
         """Saves the pixmap image to filename.
         The format for the save image is determined from the filname extension.
 
         """
-        
+
         path, name = os.path.split(filename)
         ext = name.split(".")[-1]
         self.img.write( filename, format=ext)
 
-        
+
 def color_rgb(r,g,b):
     """r,g,b are intensities of red, green, and blue in range(256)
     Returns color specifier string for the resulting color"""
     return "#%02x%02x%02x" % (r,g,b)
+
+
+### Risk: Final Project Code ###
+
+notificationBar = Text(Point(50,15),'')
+cashCardReward = Text(Point(92,92),'')
+turnsTaken = Text(Point(92,82),'')
+diceResultLabel = Text(Point(92,72),'')
+endTurnButton = Rectangle(Point(90,10),Point(95,15))
+
+playerNameLabels = [(Rectangle(Point(30,90),Point(40,95)), "Player one"),
+(Rectangle(Point(45,90),Point(55,95)), "Player two"),
+(Rectangle(Point(60,90),Point(70,95)), "Player three")]
+
+playerCards = {"Player one": Text(Point(41,95),'-'), "Player two": Text(Point(56,95),'-'),
+                "Player three": Text(Point(71,95),'-')}
+
+countriesDict = {"Country one":(Rectangle(Point(30,30),Point(40,40)),Text(Point(35,35),'-')),
+                "Country two":(Rectangle(Point(60,30),Point(70,40)),Text(Point(65,35),'-')),
+                "Country three":(Rectangle(Point(45,60),Point(55,70)),Text(Point(50,65),'-'))}
+
+def drawBoard(playerIDString):
+    # Set up window
+    win = GraphWin("Risk: Board Game", 1200, 800)
+    win.setCoords(0,0,100,100) # 100 by 100 grid
+    win.setBackground(color_rgb(255,99,71)) # red color
+
+    playerNameLabels[0][0].setFill("green")
+    playerNameLabels[0][0].draw(win)
+    playerNameLabels[1][0].setFill("gray")
+    playerNameLabels[1][0].draw(win)
+    playerNameLabels[2][0].setFill("gray")
+    playerNameLabels[2][0].draw(win)
+
+    # Set up the connection between the countries
+    line1 = Line(Point(35,40),Point(45,65))
+    line1.draw(win)
+    line2 = Line(Point(55,65),Point(65,40))
+    line2.draw(win)
+    line3 = Line(Point(40,35),Point(60,35))
+    line3.draw(win)
+    
+    # Draw the countries
+    countriesDict["Country one"][0].setFill("gray")
+    countriesDict["Country one"][0].draw(win)
+    countriesDict["Country two"][0].setFill("gray")
+    countriesDict["Country two"][0].draw(win)
+    countriesDict["Country three"][0].setFill("gray")
+    countriesDict["Country three"][0].draw(win)
+
+    # Draw the troop numbers of each country
+    countriesDict["Country one"][1].draw(win)
+    countriesDict["Country two"][1].draw(win)
+    countriesDict["Country three"][1].draw(win)
+
+    playerCards["Player one"].draw(win)
+    playerCards["Player two"].draw(win)
+    playerCards["Player three"].draw(win)
+
+
+    # Set up end turn button
+    endTurnButton.setFill("blue")
+    endTurnButton.draw(win)
+
+    notificationBar.draw(win)
+    cashCardReward.draw(win)
+    turnsTaken.draw(win)
+    diceResultLabel.draw(win)
+
+
+    # label.setPixmap(pixmap)
+    # w.resize(pixmap.width(),pixmap.height())
+
+
+    return win
+
+
+
+def clicker(win):
+    whichSquareList = []
+    buttonTuple = ("",False)
+
+    while(len(whichSquareList) < 1):
+        clicked = win.getMouse()
+        if (clicked.getX() >= 30 and clicked.getX() <= 40 and
+        clicked.getY() >= 30 and clicked.getY() <= 40):
+            whichSquareList.append("Country one")
+            buttonTuple = ("Country one",True)
+        elif (clicked.getX() >= 60 and clicked.getX() <= 70 and
+        clicked.getY() >= 30 and clicked.getY() <= 40):
+            whichSquareList.append("Country two")
+            buttonTuple = ("Country two",True)
+        elif (clicked.getX() >= 45 and clicked.getX() <= 55 and
+        clicked.getY() >= 60 and clicked.getY() <= 70):
+            whichSquareList.append("Country three")
+            buttonTuple = ("Country three",True)
+        elif (clicked.getX() >= 90 and clicked.getX() <= 95 and
+        clicked.getY() >= 10 and clicked.getY() <= 15):
+            whichSquareList.append("End turn")
+            buttonTuple = ("End turn",False)
+
+
+
+    #return ''.join(whichSquareList)
+    return buttonTuple
+
+
+playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"pink"}
+playerIDList = ["Player one", "Player two", "Player three"]
+cycledPlayersList = cycle(playerIDList)
+
+def updateBoard(win, inputTuple, occupiedCountries, cardAmounts, cashReward,
+turns, diceResults, currentPlayersTurn):
+
+    # Set notification bar to current click
+    notificationBar.setText(inputTuple)
+
+
+    # Highlight the label of the player whose current turn it is
+    for playerLabelTuple in playerNameLabels:
+        if playerLabelTuple[1] == currentPlayersTurn:
+            playerLabelTuple[0].setFill("green")
+        elif playerLabelTuple[1] != currentPlayersTurn and inputTuple[1] == True:
+            playerLabelTuple[0].setFill("gray")
+
+    # Color board according to what players own and add troops to each country
+    for countryTuple in occupiedCountries:
+        countriesDict[countryTuple[0]][0].setFill(playerIDDict[countryTuple[1]])
+        countriesDict[countryTuple[0]][1].setText(countryTuple[2])
+
+    # Display card amounts for each player
+    for cardTuple in cardAmounts:
+        playerCards[cardTuple[0]].setText(cardTuple[1])
+
+    # Highlights the country/button most recently clicked
+    if (inputTuple[1] == True): # Deals with countries
+        # Set all other countries/buttons to black outline
+        for key in countriesDict:
+            countriesDict[key][0].setOutline("black")
+            countriesDict[key][0].setWidth(1)
+        endTurnButton.setOutline("black")
+        endTurnButton.setWidth(1)
+        # Highlight the country selected
+        countriesDict[inputTuple[0]][0].setOutline("white")
+        countriesDict[inputTuple[0]][0].setWidth(6)
+    elif inputTuple[0] == "End turn": # Deals with end turn button
+        # Set all other countries/buttons to black outline
+        for key in countriesDict:
+            countriesDict[key][0].setOutline("black")
+            countriesDict[key][0].setWidth(1)
+        # Highlight end turn button
+        endTurnButton.setOutline("white")
+        endTurnButton.setWidth(4)
+
+
+    cashCardReward.setText("Cash card reward is " + str(cashReward))
+    turnsTaken.setText("Turns taken: " + str(turns))
+    diceResultLabel.setText("Attacker rolled "+str(diceResults[0]) +
+    "\n Defender rolled " + str(diceResults[1]))
+
+
+### End of Risk: Final Project Code ###
+
+
+
+    """Set coordinates of window to run from (x1,y1) in the
+    lower-left corner to (x2,y2) in the upper-right corner."""
+
 
 def test():
     win = GraphWin()
