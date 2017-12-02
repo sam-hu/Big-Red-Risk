@@ -14,23 +14,33 @@ type state = {
   board: board;
 }
 
+val get_num_troops : string -> (country*player*int) list -> int
+
 (* [init_state bd p_list st] is the initial state of the game board [bd] with
  * the players in [p_list] *)
 val init_state : int -> Board.player list -> state
 
+val make_trade_command : state -> Command.trade_command
+
 (* [trade_in cmd st] is the state that results after processing command cmd
  * [trade_in] allows the player to redeem cards for additional troops *)
 val trade_in : Command.trade_command -> state -> state
+
+val make_reinforce_command : string -> state -> Command.reinforce_command
 
 (* [reinforce cmd st] is the state that results after processing command cmd
  * [reinforce] adds troops to a country of a player's choice, so long as the
  * owns that country *)
 val reinforce : Command.reinforce_command -> state -> state
 
+val make_attack_command : string -> string -> Command.loser -> int -> state -> Command.attack_command
+
 (* [attack cmd st] is the state that results after processing command cmd
  * [attack] allows the player to select a country to attack an opponent's
  * country using a randogm dice-rolling system *)
 val attack : Command.attack_command -> state -> state
+
+val make_fortify_command : string -> state -> Command.fortify_command
 
 (* [fortify cmd st] is the state that results after processing command cmd
  * [fortify] allows the player to move troops from one country to another
