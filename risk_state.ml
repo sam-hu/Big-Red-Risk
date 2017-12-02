@@ -47,6 +47,17 @@ let make_reinforce_command to_country st =
   let countries = st.occupied_countries in
   reinforce_helper to_country active_player countries
 
+let rec init_reinforce_helper country country_list =
+  match country_list with
+  | [] -> Reinforce (country)
+  | (c,p,i)::t -> if c.country_id = country then FalseReinforce else
+      init_reinforce_helper country t
+
+let init_reinforce_command to_country st =
+  init_reinforce_helper to_country st.occupied_countries
+
+
+
 let make_pass_command = ()
 
 let rec three_same card_list circles triangles squares =
@@ -76,6 +87,34 @@ let make_trade_command st =
   else if (diff) then Different
   else NoTrade
 
+let country1 = {
+  country_id = "USA";
+  bordering_countries = ["Canada";"Mexico"]
+}
+
+let country2 = {
+  country_id = "Canada";
+  bordering_countries = ["USA"]
+}
+
+let country3 = {
+  country_id = "Mexico";
+  bordering_countries = ["USA"]
+}
+
+let country4 = {
+  country_id = "Cuba";
+  bordering_countries = ["USA";"Mexico"]
+}
+
+let continent = {
+  countries = [country1; country2; country3; country4];
+  id = "North America";
+  bonus = 5;
+}
+
+let board = [continent]
+
 let init_state player_num players = {
   num_players = player_num;
   player_turn = List.hd players;
@@ -84,8 +123,25 @@ let init_state player_num players = {
   reward = 5;
   occupied_countries = [];
   occupied_continents = [];
-  board = [];
+  board = board;
 }
+
+let rec num_countries player occupied total =
+  match occupied with
+  |[] -> total
+  |(c,p,i)::t -> if p = player then num_countries player t (total + 1) else
+      num_countries player t total
+
+let rec continent_bonus player occupied total =
+  match occupied with
+  |[] -> total
+  |(c,p)::t -> if p = player then continent_bonus player t (total + c.bonus) else
+      continent_bonus player t total
+
+let give_troops st =
+  let num = (min 3 ((num_countries st.player_turn st.occupied_countries 0)/3)) + continent_bonus st.player_turn st.occupied_continents 0 in
+  {st with player_turn = {st.player_turn with
+                         num_undeployed = st.player_turn.num_undeployed + num}}
 
 let rec remove_same_cards card_list target num_removed card_accum =
   if num_removed < 3 then
@@ -180,14 +236,14 @@ let reinforce_begin cmd st =
   match cmd with
   | FalseReinforce -> st
   | Reinforce c ->
-  (let country = parse_continent st.board c in
-  let st' = {st with player_turn =
-             {st.player_turn with
-              num_deployed = st.player_turn.num_deployed + 1;
-              num_undeployed = st.player_turn.num_undeployed - 1;};
-                     occupied_countries = (country, st.player_turn, 1)::st.occupied_countries}
-  in let continent = get_continent st'.board c in
-  {st' with occupied_continents = conquered_continent st' continent country})
+    (let country = parse_continent st.board c in
+     let st' = {st with player_turn =
+                          {st.player_turn with
+                           num_deployed = st.player_turn.num_deployed + 1;
+                           num_undeployed = st.player_turn.num_undeployed - 1};
+                        occupied_countries = (country, st.player_turn, 1)::st.occupied_countries}
+     in let continent = get_continent st'.board c in
+     {st' with occupied_continents = conquered_continent st' continent country})
 
 
 let pass c st = st
@@ -197,23 +253,44 @@ let rec get_num_troops target country_list =
   |[] -> failwith "country DNE"
   |(c, p, i)::t -> if c.country_id = target then i else get_num_troops target t
 
-let rec change_possession occupied_list target player acc =
+let rec change_possession occupied_list origin target player acc =
   match occupied_list with
   |[] -> acc
   |(c, p, i)::t -> if c.country_id = target then
-      update_countries t target player ((c,player,1)::acc) else
-      update_countries t target player ((c,p,i)::acc)
+      change_possession t origin target player ((c,player,1)::acc)
+    else if c.country_id = origin then
+        change_possession t origin target player ((c,player,i-1)::acc)
+    else
+      change_possession t origin target player ((c,p,i)::acc)
 
 
-let attack cmd st =
+let attack cmd (st:state) =
   match cmd with
   | FalseAttack -> st
   | Attack c -> (match c with
-  |(l, r, Left, i) -> {st with occupied_countries = update_countries st.occupied_countries l i []}
-  |(l, r, Right, i) -> {st with occupied_countries = update_countries st.occupied_countries r i []}
-  |(l, r, Both, i) -> {st with occupied_countries = update_countries (update_countries st.occupied_countries l i []) r i []}
-)
+      |(l, r, Left, i) -> {st with occupied_countries = update_countries st.occupied_countries l i []}
+      |(l, r, Right, i) -> let st' = {st with occupied_countries = update_countries st.occupied_countries r i []} in
+        if get_num_troops r st'.occupied_countries = 0 then
+          let st'' = {st' with occupied_countries = change_possession st'.occupied_countries l r st'.player_turn []} in
+          let country = parse_continent st''.board r in
+          let continent = get_continent st''.board r in
+          {st'' with occupied_continents = conquered_continent st'' continent country}
+        else st'
+      |(l, r, Both, i) -> {st with occupied_countries = update_countries (update_countries st.occupied_countries l i []) r i []})
 
+let rec get_country_count country_list player counter =
+  match country_list with
+  |[] -> counter
+  |(c,p,i)::t -> if p = player then get_country_count t player (counter + 1) else
+      get_country_count t player counter
+
+let give_card st1 st2 = if get_country_count st1.occupied_countries st1.player_turn 0 < get_country_count st2.occupied_countries st1.player_turn 0 then
+    {st2 with player_turn = {st1.player_turn with
+                             cards =
+                               if (int_of_float (Sys.time ())) mod 3 = 0 then Circle::(st1.player_turn.cards)
+                               else if (int_of_float (Sys.time ())) mod 3 = 1 then Triangle::(st1.player_turn.cards)
+                               else Square::(st1.player_turn.cards)}}
+  else st2
 
 let fortify cmd st =
   match cmd with
@@ -239,3 +316,10 @@ let next_player st =
       h3 = st.player_turn then {st with player_turn = h4} else
         {st with player_turn = h}
   |_ -> failwith "too many players"
+
+let check_if_win st =
+  let rec checker occupied target =
+    match occupied with
+    |[] -> true
+    |(c,p,i)::t -> if p = target then checker t target else false
+  in checker st.occupied_countries st.player_turn

@@ -41,3 +41,11 @@ val fortify : Command.fortify_command -> state -> state
  * [pass] allows the user to do nothing during his or her turn, or to signal the
  * end of a turn *)
 val pass : Command.pass_command -> state -> state
+
+val next_player: state -> state
+
+val reinforce_begin: Command.reinforce_command -> state -> state
+
+val give_troops: state -> state
+
+val get_num_troops: string -> (Board.country * Board.player * int) list -> int
