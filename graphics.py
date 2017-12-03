@@ -976,8 +976,8 @@ playerNameLabels = [(Rectangle(Point(30,90),Point(40,95)), "Player one"),
 (Rectangle(Point(45,90),Point(55,95)), "Player two"),
 (Rectangle(Point(60,90),Point(70,95)), "Player three")]
 
-playerCards = {"Player one": Text(Point(41,95),'-'), "Player two": Text(Point(56,95),'-'),
-                "Player three": Text(Point(71,95),'-')}
+playerCards = {"Player one": Text(Point(41,95),0), "Player two": Text(Point(56,95),0),
+                "Player three": Text(Point(71,95),0)}
 
 countriesDict = {"Country one":(Rectangle(Point(30,30),Point(40,40)),Text(Point(35,35),'-')),
                 "Country two":(Rectangle(Point(60,30),Point(70,40)),Text(Point(65,35),'-')),
