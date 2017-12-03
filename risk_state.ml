@@ -427,7 +427,7 @@ let rec remove_player st =
       else (scan t (h::acc)) in let new_players = (scan st.active_players []) |> List.rev in
   {st with active_players = new_players}
 
-let give_card st1 st2 = if num_countries st2.player_turn st1.occupied_countries 0 <= num_countries st2.player_turn st2.occupied_countries 0 then
+let give_card st1 st2 = if num_countries st1.player_turn st1.occupied_countries 0 < num_countries st2.player_turn st2.occupied_countries 0 then
     (let st = {st2 with player_turn = {st2.player_turn with
                              cards =
                                if (int_of_float (Sys.time ())) mod 3 = 0 then (Circle::(st2.player_turn.cards))

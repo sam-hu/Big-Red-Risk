@@ -106,7 +106,7 @@ let rec reinforce_type st reinforce_cmd_type rein_type =
       (let cmd = reinforce_cmd_type (string_of_clicked clicked) st in
        let st' = rein_type cmd st in (update_board_with_click st' clicked
             (if undeploys > 1 then reinforce_notification st' else attack_notification_from st'));
-       reinforce_type st' reinforce_cmd_type rein_type) else st
+       reinforce_type st' reinforce_cmd_type rein_type) else reinforce_type st reinforce_cmd_type rein_type
 
 let rec reinforce_until_occupied_loop st =
   if (List.length st.occupied_countries = 3) then st (*3 is hard-coded*)
@@ -119,7 +119,7 @@ let rec reinforce_until_occupied_loop st =
      | Reinforce _ ->
        (let st' = reinforce_begin cmd st in update_board_with_click st' clicked (startgame_reinforce_notification st');
       reinforce_until_occupied_loop st')
-   else st
+   else reinforce_until_occupied_loop st
 
 let rec reinforce_occupied_loop st =
  if (all_troops_deployed st.active_players) then st
@@ -133,7 +133,7 @@ let rec reinforce_occupied_loop st =
        (let st' = next_player (reinforce cmd st) in update_board_with_click st' clicked (startgame_populate_notification st');
         Pervasives.print_endline st'.player_turn.player_id;
      reinforce_occupied_loop st')
-   else st
+   else reinforce_occupied_loop st
 (* Creates a reinforcement loop for the middle of the game*)
 let midgame_reinforce_loop st = reinforce_type st make_reinforce_command reinforce
 (* Creates a reinforcement loop for the start of the game when players

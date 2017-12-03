@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/psbang008/.opam/4.05.0/lib/lymp/lymp.py", line 87, in loop
+    ret = self.execute_instruction(instruction)
+  File "/Users/psbang008/.opam/4.05.0/lib/lymp/lymp.py", line 197, in execute_instruction
+    ret = func_or_attr(*args, **named)
+  File "/Users/psbang008/Desktop/RiskBoardGame/graphics.py", line 1048, in clicker
+    clicked = win.getMouse()
+  File "/Users/psbang008/Desktop/RiskBoardGame/graphics.py", line 317, in getMouse
+    if self.isClosed(): raise GraphicsError("getMouse in closed window")
+graphics.GraphicsError: getMouse in closed window
