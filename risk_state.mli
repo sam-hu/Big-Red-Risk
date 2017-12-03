@@ -67,3 +67,11 @@ val give_card: state -> state -> state
 val init_reinforce_command: string -> state -> Command.reinforce_command
 
 val all_troops_deployed : player list -> bool
+
+val owns_country: string -> (Board.country*Board.player*int) list -> Board.player -> bool
+
+val print_player: Board.player -> unit
+
+val check_if_win: state -> bool
+
+val remove_player: state -> state

@@ -999,8 +999,8 @@ def drawBoard():
     # Set up the connection between the countries
     line1 = Line(Point(35,40),Point(45,65))
     line1.draw(win)
-    line2 = Line(Point(55,65),Point(65,40))
-    line2.draw(win)
+    # line2 = Line(Point(55,65),Point(65,40))
+    # line2.draw(win)
     line3 = Line(Point(40,35),Point(60,35))
     line3.draw(win)
 
@@ -1070,15 +1070,17 @@ def clicker(win):
 
 
 playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"pink"}
-playerIDList = ["Player one", "Player two", "Player three"]
-cycledPlayersList = cycle(playerIDList)
+
+def updateNotificationBar(notification):
+    # Set notification bar to current click
+    if (notification != ""):
+        notificationBar.setText(notification)
+
 
 def updateBoard(win, inputTuple, occupiedCountries, cardAmounts, cashReward,
-turns, diceResults, currentPlayersTurn):
+turns, diceResults, currentPlayersTurn, notification):
 
-    # Set notification bar to current click
-    notificationBar.setText(inputTuple)
-
+    updateNotificationBar(notification)
 
     # Highlight the label of the player whose current turn it is
     for playerLabelTuple in playerNameLabels:
@@ -1124,10 +1126,11 @@ turns, diceResults, currentPlayersTurn):
     "\n Defender rolled " + str(diceResults[1]))
 
 def updateBoardNoClick(win, occupiedCountries, cardAmounts, cashReward,
-turns, diceResults, currentPlayersTurn):
+turns, diceResults, currentPlayersTurn, notification):
 
     # Set notification bar to current click
     #notificationBar.setText(inputTuple)
+    updateNotificationBar(notification)
 
 
     # Highlight the label of the player whose current turn it is
