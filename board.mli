@@ -32,3 +32,5 @@ type player = {
 (* A [board] is a graph of countries where countries that border each other are
  * connected on the graph. *)
 type board = continent list
+
+val graphboard : board

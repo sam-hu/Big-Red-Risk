@@ -18,6 +18,12 @@ let rec print_list = function
 let board = get graphics "drawBoard" []
 let dice_results = Pytuple [Pylist[Pyint 6; Pyint 5; Pyint 3];Pylist[Pyint 6; Pyint 1;]]
 
+(* Returns tuple of matching country *)
+let rec get_country_tuple occupied_countries (target: string) =
+  match occupied_countries with
+  |[] -> Pynone
+  |(c,p,i)::t -> if c.country_id = target then (Pytuple [Pystr c.country_id;Pystr p.player_id;Pyint i]) else get_country_tuple t target
+
 (* Convert occupied countries list to python*)
 let rec occupied_countries_python occupied_countries acc =
   match occupied_countries with
@@ -48,17 +54,28 @@ match clicked with
 let update_board_with_click the_state clicked notification=
   match clicked with
   | Pytuple [Pystr str; Pybool b] -> call graphics "updateBoard"
-  [board;clicked;occupied_countries_python the_state.occupied_countries [];
+  [board;clicked;get_country_tuple the_state.occupied_countries str;
   card_amounts_python the_state.active_players [];Pyint the_state.reward;
    Pyint the_state.total_turns;dice_results;Pystr the_state.player_turn.player_id;
   notification];
   | _ -> failwith "Should not be here"
 (* Updates the graphics of board without a click*)
 let update_board_no_click the_state notification = call graphics "updateBoardNoClick"
-  [board;occupied_countries_python the_state.occupied_countries [];
+  [board;Pynone;
    card_amounts_python the_state.active_players [];Pyint the_state.reward;
    Pyint the_state.total_turns;dice_results;Pystr the_state.player_turn.player_id;
-  notification]
+   notification]
+(*Update board for attacks*)
+let update_board_attack the_state clicked1 clicked2 notification =
+  match clicked1,clicked2 with
+  | Pytuple [Pystr str1; Pybool b1], Pytuple [Pystr str2; Pybool b2] ->
+    call graphics "updateAttack"
+      [board;clicked1;get_country_tuple the_state.occupied_countries str1;
+       get_country_tuple the_state.occupied_countries str2;
+    card_amounts_python the_state.active_players [];Pyint the_state.reward;
+     Pyint the_state.total_turns;dice_results;Pystr the_state.player_turn.player_id;
+    notification];
+  | _ -> failwith "Should not be here"
 
 let update_notification (notification) = call graphics "updateNotificationBar" [notification]
 
@@ -75,7 +92,7 @@ let reinforce_notification st =
   Pystr (st.player_turn.player_id ^ ": Reinforce " ^ (string_of_int st.player_turn.num_undeployed) ^ " troops")
 
 let attack_notification_from st =
-  Pystr (st.player_turn.player_id ^ ": Time to attack! Select a country you own to attack from, or pass to Fortification Stage")
+  Pystr (st.player_turn.player_id ^ ": Select a country you own to attack from, or pass to fortification")
 
 let attack_notification_to st =
   Pystr (st.player_turn.player_id ^ ": Now, select an opponent's country to battle!")
@@ -84,7 +101,7 @@ let earn_card_notification st =
   Pystr (st.player_turn.player_id ^ ": You earned a cash card for conquering a country on your turn!")
 
 let fortification_notification st =
-  Pystr (st.player_turn.player_id ^ ": Select one of your countries to pull out troops from for reinforcement, or pass to end your turn")
+  Pystr (st.player_turn.player_id ^ ": Select one of your countries to pull out troops from, or pass to end your turn")
 
 let eliminated_notification st =
   Pystr (st.player_turn.player_id ^ ": You eliminated a player from the game!")
@@ -116,7 +133,7 @@ let rec reinforce_type st reinforce_cmd_type rein_type =
        reinforce_type st' reinforce_cmd_type rein_type) else reinforce_type st reinforce_cmd_type rein_type
 
 let rec reinforce_until_occupied_loop st =
-  if (List.length st.occupied_countries = 3) then st (*3 is hard-coded*)
+  if (List.length st.occupied_countries = 24) then st (*3 is hard-coded*)
  else
    let clicked = get graphics "clicker" [board] in
    if (bool_of_clicked clicked) then
@@ -142,6 +159,23 @@ let rec reinforce_occupied_loop st =
    else reinforce_occupied_loop st
 (* Creates a reinforcement loop for the middle of the game*)
 let midgame_reinforce_loop st = reinforce_type st make_reinforce_command reinforce
+
+let rec reinforce_till_occupied_attack st option1 option2 =
+  let undeploys = st.player_turn.num_undeployed in
+  if st.player_turn.num_undeployed = 0 then st else
+    let clicked = get graphics "clicker" [board] in
+    update_notification (reinforce_notification st);
+    if bool_of_clicked clicked = false then reinforce_till_occupied_attack st option1 option2 else
+    let clickedstring = string_of_clicked clicked in
+    if clickedstring = option1 || clickedstring = option2 then
+      let cmd = make_reinforce_command clickedstring st in
+      let st2 = reinforce cmd st in (update_board_with_click st2 clicked
+         (if undeploys > 1 then reinforce_notification st2
+          else if ((undeploys = 1) && (bool_of_clicked clicked = false)) || ((undeploys = 1) && (owns_country (string_of_clicked clicked) st.occupied_countries st.player_turn <> true))
+          then reinforce_notification st2
+          else attack_notification_from st2));
+      reinforce_till_occupied_attack st2 option1 option2
+    else reinforce_till_occupied_attack st option1 option2
 (* Creates a reinforcement loop for the start of the game when players
    begin claiming countries*)
 (* let startgame_reinforce_loop st = reinforce_type st init_reinforce_command reinforce_begin *)
@@ -175,6 +209,7 @@ let rec get_click_two st =
   let clicked2string = (string_of_clicked clicked2) in
   if (owns_country clicked2string st.occupied_countries st.player_turn = true)
     then get_click_two st else (clicked2, clicked2string)
+
 
 (* Creates an attack loop that can be existed if user hits end turn*)
 let rec attack_loop st =   (*have to check if one side lost*)
@@ -210,8 +245,13 @@ let rec attack_loop st =   (*have to check if one side lost*)
           else (if (attack_max > defend_max) then (Right, -1) else (Left, -1)) in
         let cmd = make_attack_command (string_of_clicked clicked1) (string_of_clicked clicked2)
                                       (fst loser_lost) (snd loser_lost) st in
-        let st2 = attack cmd st in update_board_with_click st2 clicked2 (attack_notification_from st2);
-        attack_loop (st2)))
+        let st2 = attack cmd st in
+        update_board_attack st2 clicked1 clicked2 (attack_notification_from st2);
+        if num_countries st2.player_turn st2.occupied_countries 0 = 24 then st2
+        else if num_countries st2.player_turn st2.occupied_countries 0 > num_countries st.player_turn st.occupied_countries 0 then
+          let st3 = reinforce_till_occupied_attack st2 clicked1string clicked2string in
+          attack_loop st3
+        else attack_loop (st2)))
 
 (* [repl st has_won] is the heart of the game's REPL. It performs all actions
     in the RISK Board Game systematically for every player. It is initially
@@ -229,6 +269,7 @@ let rec repl st has_won =
     update_notification (reinforce_notification st1');
     let st2 = midgame_reinforce_loop (st1') in
     let st3 = attack_loop st2 in (update_board_no_click st3) (Pystr "");
+    if num_countries st3.player_turn st3.occupied_countries 0 = 24 then repl st3 true else
     let st4 = give_card st2 st3 in (update_board_no_click st4) (if st3 = st4 then Pystr "" else earn_card_notification st4); Unix.sleep 2;
     let st5 = fortify_loop st4 in (update_board_no_click st4) (Pystr "");
     (* let st6 = midgame_reinforce_loop st5 in *)
@@ -247,7 +288,7 @@ let rec repl st has_won =
 let p1 = {
   player_id = "Player one";
   num_deployed = 0;
-  num_undeployed = 3;
+  num_undeployed = 10;
   cards = [];
   score = 0;
 }
@@ -255,7 +296,7 @@ let p1 = {
 let p2 = {
   player_id = "Player two";
   num_deployed = 0;
-  num_undeployed = 3;
+  num_undeployed = 10;
   cards = [];
   score = 0;
 }
@@ -263,10 +304,19 @@ let p2 = {
 let p3 = {
   player_id = "Player three";
   num_deployed = 0;
-  num_undeployed = 3;
+  num_undeployed = 10;
   cards = [];
   score = 0;
 }
+
+let p4 = {
+  player_id = "Player four";
+  num_deployed = 0;
+  num_undeployed = 10;
+  cards = [];
+  score = 0;
+}
+
 (* let clicked = get graphics "clicker" [board] in
 (match clicked with
   | Pytuple [Pystr st; Pybool b] ->
@@ -283,7 +333,7 @@ let p3 = {
 ); *)
 
 let () =
-  let i_state = init_state 3 [p1;p2;p3] in
+  let i_state = init_state 4 [p1;p2;p3;p4] graphboard in
   update_notification (startgame_reinforce_notification i_state);
   let st1 = reinforce_until_occupied_loop i_state in
   let st2 = reinforce_occupied_loop st1 in

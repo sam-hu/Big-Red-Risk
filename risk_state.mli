@@ -18,7 +18,7 @@ val get_num_troops : string -> (country*player*int) list -> int
 
 (* [init_state bd p_list st] is the initial state of the game board [bd] with
  * the players in [p_list] *)
-val init_state : int -> Board.player list -> state
+val init_state : int -> Board.player list -> board -> state
 
 val make_trade_command : state -> Command.trade_command
 
@@ -75,3 +75,5 @@ val print_player: Board.player -> unit
 val check_if_win: state -> bool
 
 val remove_player: state -> state
+
+val num_countries: Board.player -> (Board.country * Board.player * int) list -> int -> int
