@@ -1,5 +1,6 @@
 open Command
 open Board
+open Unix
 
 type state = {
   num_players: int;
@@ -428,13 +429,16 @@ let rec remove_player st =
   {st with active_players = new_players}
 
 let give_card st1 st2 = if num_countries st1.player_turn st1.occupied_countries 0 < num_countries st2.player_turn st2.occupied_countries 0 then
-    (let st = {st2 with player_turn = {st2.player_turn with
+    let ran_var = int_of_float (Unix.time ()) in
+    let st = {st2 with player_turn = {st2.player_turn with
                              cards =
-                               if (int_of_float (Sys.time ())) mod 3 = 0 then (Circle::(st2.player_turn.cards))
-                               else if (int_of_float (Sys.time ())) mod 3 = 1 then ( Triangle::(st2.player_turn.cards))
-                               else (Square::(st2.player_turn.cards))}} in
+                               if ran_var mod 3 = 0 then (Pervasives.print_endline "Circle"; Circle::(st2.player_turn.cards))
+                               else if ran_var mod 3 = 1 then (Pervasives.print_endline "Triangle"; Triangle::(st2.player_turn.cards))
+                               else if ran_var mod 3 = 2 then (Pervasives.print_endline "Square"; Square::(st2.player_turn.cards))
+                               else failwith "Booo"}}
+     in
      {st with active_players = update_player st2.player_turn st.player_turn st2.active_players [];
-              occupied_countries = change_player st.occupied_countries st.player_turn []})
+              occupied_countries = change_player st.occupied_countries st.player_turn []}
   else st2
 
 let fortify cmd st =

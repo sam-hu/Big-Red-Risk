@@ -983,6 +983,20 @@ countriesDict = {"Country one":(Rectangle(Point(30,30),Point(40,40)),Text(Point(
                 "Country two":(Rectangle(Point(60,30),Point(70,40)),Text(Point(65,35),'-')),
                 "Country three":(Rectangle(Point(45,60),Point(55,70)),Text(Point(50,65),'-'))}
 
+playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"pink"}
+
+def updateNotificationBar(notification):
+    # Set notification bar to current click
+    if (notification != ""):
+        notificationBar.setText(notification)
+
+def updateTurnHighlighter(currentPlayersTurn):
+    for playerLabelTuple in playerNameLabels:
+        if playerLabelTuple[1] == currentPlayersTurn:
+            playerLabelTuple[0].setFill("green")
+        elif playerLabelTuple[1] != currentPlayersTurn:
+            playerLabelTuple[0].setFill("gray")
+
 def drawBoard():
     # Set up window
     win = GraphWin("Risk: Board Game", 1200, 800)
@@ -1069,12 +1083,6 @@ def clicker(win):
     return buttonTuple
 
 
-playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"pink"}
-
-def updateNotificationBar(notification):
-    # Set notification bar to current click
-    if (notification != ""):
-        notificationBar.setText(notification)
 
 
 def updateBoard(win, inputTuple, occupiedCountries, cardAmounts, cashReward,
@@ -1083,11 +1091,7 @@ turns, diceResults, currentPlayersTurn, notification):
     updateNotificationBar(notification)
 
     # Highlight the label of the player whose current turn it is
-    for playerLabelTuple in playerNameLabels:
-        if playerLabelTuple[1] == currentPlayersTurn:
-            playerLabelTuple[0].setFill("green")
-        elif playerLabelTuple[1] != currentPlayersTurn and inputTuple[1] == True:
-            playerLabelTuple[0].setFill("gray")
+    updateTurnHighlighter(currentPlayersTurn)
 
     # Color board according to what players own and add troops to each country
     for countryTuple in occupiedCountries:
@@ -1129,16 +1133,8 @@ def updateBoardNoClick(win, occupiedCountries, cardAmounts, cashReward,
 turns, diceResults, currentPlayersTurn, notification):
 
     # Set notification bar to current click
-    #notificationBar.setText(inputTuple)
     updateNotificationBar(notification)
-
-
-    # Highlight the label of the player whose current turn it is
-    # for playerLabelTuple in playerNameLabels:
-    #     if playerLabelTuple[1] == currentPlayersTurn:
-    #         playerLabelTuple[0].setFill("green")
-    #     elif playerLabelTuple[1] != currentPlayersTurn and inputTuple[1] == True:
-    #         playerLabelTuple[0].setFill("gray")
+    updateTurnHighlighter(currentPlayersTurn)
 
     # Color board according to what players own and add troops to each country
     for countryTuple in occupiedCountries:

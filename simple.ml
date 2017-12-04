@@ -92,6 +92,10 @@ let eliminated_notification st =
 let next_turn_notification st =
   Pystr (st.player_turn.player_id ^ ": It's your turn!")
 
+let cash_in_notification st =
+  Pystr (st.player_turn.player_id ^ ": Cashing in cards if available...")
+
+
 
 
 (* Creates a reinforcement loop that performs the reinforcement action*)
@@ -105,7 +109,10 @@ let rec reinforce_type st reinforce_cmd_type rein_type =
     if (bool_of_clicked clicked) then
       (let cmd = reinforce_cmd_type (string_of_clicked clicked) st in
        let st' = rein_type cmd st in (update_board_with_click st' clicked
-            (if undeploys > 1 then reinforce_notification st' else attack_notification_from st'));
+        (if undeploys > 1 then reinforce_notification st'
+         else if ((undeploys = 1) && (bool_of_clicked clicked = false)) || ((undeploys = 1) && (owns_country (string_of_clicked clicked) st.occupied_countries st.player_turn <> true))
+         then reinforce_notification st'
+         else attack_notification_from st'));
        reinforce_type st' reinforce_cmd_type rein_type) else reinforce_type st reinforce_cmd_type rein_type
 
 let rec reinforce_until_occupied_loop st =
@@ -131,7 +138,6 @@ let rec reinforce_occupied_loop st =
      | FalseReinforce -> reinforce_occupied_loop st
      | Reinforce _ ->
        (let st' = next_player (reinforce cmd st) in update_board_with_click st' clicked (startgame_populate_notification st');
-        Pervasives.print_endline st'.player_turn.player_id;
      reinforce_occupied_loop st')
    else reinforce_occupied_loop st
 (* Creates a reinforcement loop for the middle of the game*)
@@ -216,8 +222,9 @@ let rec attack_loop st =   (*have to check if one side lost*)
 let rec repl st has_won =
   if (has_won) then st (*display win message*)
   else
+    ((update_board_no_click st);
     let st' = build_continent_list st in
-    let st1 = trade_in st' in (update_board_no_click st1) (Pystr "Trade turn still needs implementation"); Unix.sleep 2;
+    let st1 = trade_in st' in (update_board_no_click st1 (cash_in_notification st1)); Unix.sleep 2;
     let st1' = give_troops st1 in
     update_notification (reinforce_notification st1');
     let st2 = midgame_reinforce_loop (st1') in
@@ -231,7 +238,7 @@ let rec repl st has_won =
     (* print_int (List.length st6'.active_players); *)
     let st7 = next_player st6' in (update_board_no_click st7) (next_turn_notification st7); Unix.sleep 1;
     let won = check_if_win st7 in
-    repl st7 won
+    repl st7 won)
     (* let clicked1 = get graphics "clicker" [board] in
     st4 *)
 
