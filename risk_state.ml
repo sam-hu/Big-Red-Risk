@@ -2,6 +2,7 @@ open Command
 open Board
 open Unix
 
+(* type [state] is the representation of every aspect of the game state *)
 type state = {
   num_players: int;
   player_turn: player;
@@ -14,7 +15,6 @@ type state = {
 }
 (*************************************)
 
-
 let print_player player =
   Pervasives.print_endline player.player_id;
   Pervasives.print_int player.num_deployed;
@@ -23,6 +23,8 @@ let print_player player =
   Pervasives.print_int player.score;
   Pervasives.print_endline ""
 
+(* Returns: true if [player] owns the country identified by [country_string]
+   in [occupied_list], false otherwise *)
 let rec owns_country country_string occupied_list player =
   match occupied_list with
   |[] -> false
@@ -30,19 +32,21 @@ let rec owns_country country_string occupied_list player =
     if (player = p && c.country_id = country_string) then true
     else owns_country country_string t player
 
-(* returns the country in country_list with country_id [target]
+(* returns the country in [country_list] with country_id [target]
  * Precondition: [target] is in country_list *)
 let rec get_country_assured country_list target =
   match country_list with
   |[] -> failwith "Precondition violated"
   |h::t -> if h.country_id = target then h else get_country_assured t target
 
-(*returns a list of all countries in [continent_list]*)
-let rec get_all_countries continent_list acc : country list=
+(* returns a list of all countries in [continent_list] *)
+let rec get_all_countries continent_list acc =
   match continent_list with
-  | [] -> acc
-  | h1::t1 -> get_all_countries t1 (h1.countries @ acc)
+  |[] -> acc
+  |h::t -> get_all_countries t (h.countries @ acc)
 
+(* returns Attack command if [attacker] and [defender] are valid in the
+   game, FalseAttack otherwise *)
 let rec attack_helper attacker defender loser lost player countries good_attacker good_defender =
   match countries with
   | [] -> if (good_attacker && good_defender) then Attack (attacker, defender, loser, lost) else FalseAttack
@@ -50,6 +54,8 @@ let rec attack_helper attacker defender loser lost player countries good_attacke
     else if (c.country_id = defender && p.player_id <> player) then attack_helper attacker defender loser lost player t good_attacker true
     else attack_helper attacker defender loser lost player t good_attacker good_defender
 
+(* returns Attack command if [attacker] and [defender] are valid in the game
+   FalseAttack otherwise *)
 let make_attack_command attacker defender loser lost st =
   let attacking_country = get_country_assured (get_all_countries st.board []) attacker in
   let defending_country = get_country_assured (get_all_countries st.board []) defender in
@@ -59,46 +65,48 @@ let make_attack_command attacker defender loser lost st =
   attack_helper attacker defender loser lost active_player countries false false
   else FalseAttack
 
+(* returns Fortify command if [player] owns [country] in [country_list] and has
+   more than one troop in that country, FalseFortify otherwise *)
 let rec fortify_helper country player country_list =
   match country_list with
   | [] -> FalseFortify
   | (c, p, i)::t -> if (c.country_id = country && p.player_id = player && i > 1) then Fortify (country)
     else fortify_helper country player t
 
+(* returns Fortify command if [from_country] is a valid country to fortify from,
+   FalseFortify otherwise *)
 let make_fortify_command from_country st =
   let active_player = st.player_turn.player_id in
   let countries = st.occupied_countries in
   fortify_helper from_country active_player countries
 
+(* returns Reinforce command if [player] owns [country], FalseReinforce
+   otherwise *)
 let rec reinforce_helper country player country_list =
   match country_list with
   | [] -> FalseReinforce
   | (c, p, i)::t -> if (c.country_id = country && p.player_id = player) then Reinforce (country)
     else reinforce_helper country player t
 
+(* returns Reinforce command if [to_country] is valid, FalseReinforce otherwise
+ *)
 let make_reinforce_command to_country st =
   let active_player = st.player_turn.player_id in
   let countries = st.occupied_countries in
   reinforce_helper to_country active_player countries
 
+(* returns Reinforce command if [country] is not in [country_list],
+   FalseReinforce otherwise *)
 let rec init_reinforce_helper country country_list =
   match country_list with
   | [] -> Reinforce (country)
   | (c,p,i)::t -> if c.country_id = country then FalseReinforce else
       init_reinforce_helper country t
 
+(* returns Reinforce command if [to_country] is a valid country,
+   FalseReinforce otherwise*)
 let init_reinforce_command to_country st =
   init_reinforce_helper to_country st.occupied_countries
-
-(* let rec reinforce_attack_helper country1 country2 player country_list =
-   match country_list with
-   |[] -> FalseReinforce
-   |(c,p,i)::t -> if ((c.country_id = country1 || c.country_id = country2) && p.player_id = player) then Reinforce (country)
-    else reinforce_attack_helper country1 country2 player t
-   let reinforce_after_attack to_country option1 option2 st =
-   let active_player = st.player_turn.player_id in
-   let countries = st.occupied_countries in
-   reinforce_attack_helper to_country1 to_country2 active_player countries *)
 
 let rec all_troops_deployed players =
   match players with
@@ -158,7 +166,7 @@ let next_player_player st =
   match st.active_players with
   |[] -> failwith "0 players?"
   |h::[] -> h
-  |h::h2::[] -> failwith "heres the issue"
+  |h::h2::[] -> if h = st.player_turn then h2 else h
   (* if h = st.player_turn then h2 else h *)
   |h::h2::h3::[] -> if h = st.player_turn then h2
     else if h2 = st.player_turn then h3 else h
@@ -181,17 +189,19 @@ let rec num_countries player occupied total =
   |(c,p,i)::t -> if p = player then num_countries player t (total + 1) else
       num_countries player t total
 
-let rec continent_bonus player occupied total =
+let rec continent_bonus occupied total =
   match occupied with
   |[] -> total
-  |c::t -> continent_bonus player t (total + c.bonus)
+  |c::t -> continent_bonus t (total + c.bonus)
 
 let give_troops st =
-  let num = (max 3 ((num_countries st.player_turn st.occupied_countries 0)/3)) + continent_bonus st.player_turn st.player_continents 0 in
+  let num = (max 3 ((num_countries st.player_turn st.occupied_countries 0)/3)) + continent_bonus st.player_continents 0 in
   let st' = {st with player_turn = {st.player_turn with
                                     num_undeployed = st.player_turn.num_undeployed + num}} in
   {st' with active_players = update_player st.player_turn st'.player_turn st.active_players [];
             occupied_countries = change_player st'.occupied_countries st'.player_turn []}
+
+
 
 let rec remove_same_cards card_list target num_removed card_accum =
   if num_removed < 3 then
@@ -314,8 +324,6 @@ let reinforce_begin cmd st =
              active_players = update_player st.player_turn player_updated st.active_players []}
 
 
-let pass c st = st
-
 let rec get_num_troops target country_list =
   match country_list with
   |[] -> failwith "get_num_troops error"
@@ -427,14 +435,17 @@ let fortify cmd st =
     |[] -> failwith "0 players?"
     |h::[] -> st
     |h::h2::[] -> if h = st.player_turn then {st with player_turn = h2} else
-        {st with player_turn = h}
+        {st with player_turn = h;
+        total_turns = st.total_turns + 1}
     |h::h2::h3::[] -> if h = st.player_turn then {st with player_turn = h2}
       else if h2 = st.player_turn then {st with player_turn = h3} else
-        {st with player_turn = h}
+        {st with player_turn = h;
+        total_turns = st.total_turns + 1}
     |h::h2::h3::h4::[] -> if h = st.player_turn then {st with player_turn = h2}
       else if h2 = st.player_turn then {st with player_turn = h3} else if
         h3 = st.player_turn then {st with player_turn = h4} else
-        {st with player_turn = h}
+        {st with player_turn = h;
+        total_turns = st.total_turns + 1}
     |_ -> failwith "too many players"
 
 let check_if_win st =
@@ -443,3 +454,28 @@ let check_if_win st =
     |[] -> true
     |(c,p,i)::t -> if p = target then checker t target else false
   in checker st.occupied_countries st.player_turn
+
+let rec num_continents occupied total =
+  match occupied with
+  |[] -> total
+  |c::t -> continent_bonus t (total + 1)
+
+let rec update_individual_score st =
+  let st' = build_continent_list st in
+  let st2 = {st with player_turn = {st'.player_turn with
+                                    score = num_countries st'.player_turn st'.occupied_countries 0 + num_continents st'.player_continents 0}} in
+  {st2 with active_players = update_player st.player_turn st2.player_turn st.active_players [];
+            occupied_countries = change_player st2.occupied_countries st2.player_turn []}
+
+let update_scores st =
+  let st2 = update_individual_score st in
+  let st3 = next_player st2 in
+  if st3.player_turn = st.player_turn then st3 else
+  let st4 = update_individual_score st3 in
+  let st5 = next_player st4 in
+  if st5.player_turn = st.player_turn then st5 else
+  let st6 = update_individual_score st5 in
+  let st7 = next_player st6 in
+  if st7.player_turn = st.player_turn then st7 else
+  let st8 = update_individual_score st7 in
+  next_player st8

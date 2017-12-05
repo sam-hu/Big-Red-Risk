@@ -50,7 +50,7 @@ val fortify : Command.fortify_command -> state -> state
 (* [pass cmd st] is the state that results after processing command cmd
  * [pass] allows the user to do nothing during his or her turn, or to signal the
  * end of a turn *)
-val pass : Command.pass_command -> state -> state
+(* val pass : Command.pass_command -> state -> state *)
 
 val next_player: state -> state
 

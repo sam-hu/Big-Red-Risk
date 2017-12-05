@@ -972,6 +972,8 @@ turnsTaken = Text(Point(9,98),'')
 diceResultLabel = Text(Point(92,72),'') #not done
 endTurnButton = Rectangle(Point(33,15),Point(42,23))
 
+playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"brown", "Player four":"purple"}
+
 playerNameLabels = [(Rectangle(Point(1,2),Point(10,8)), "Player one"),
 (Rectangle(Point(26,2),Point(35,8)), "Player two"),
 (Rectangle(Point(51,2),Point(60,8)), "Player three"),
@@ -1393,10 +1395,6 @@ def clicker(win):
     return buttonTuple
 
 
-playerIDDict = {"Player one":"red", "Player two":"orange", "Player three":"pink", "Player four":"purple"}
-
-
-
 def updateDice(attack,defend,win):
 	if len(attack)==3:
 		attack_one = Image(Point(86,88),dice[attack[0]])
@@ -1557,6 +1555,12 @@ turns, diceResults, currentPlayersTurn, notification):
 
     update(win, occupiedCountries, cardAmounts, cashReward,
     turns, diceResults, currentPlayersTurn, notification)
+
+    for playerLabelTuple in playerNameLabels:
+        if playerLabelTuple[1] == currentPlayersTurn:
+            playerLabelTuple[0].setFill("green")
+        elif playerLabelTuple[1] != currentPlayersTurn:
+            playerLabelTuple[0].setFill("gray")
 
 
 ### End of Risk: Final Project Code ###

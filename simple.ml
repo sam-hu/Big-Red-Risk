@@ -2,6 +2,7 @@ open Lymp
 open Risk_state
 open Command
 open Board
+open AI
 
 (* change "python3" to the name of your interpreter *)
 let interpreter = "python3"
@@ -133,7 +134,7 @@ let rec reinforce_type st reinforce_cmd_type rein_type =
        reinforce_type st' reinforce_cmd_type rein_type) else reinforce_type st reinforce_cmd_type rein_type
 
 let rec reinforce_until_occupied_loop st =
-  if (List.length st.occupied_countries = 24) then st (*3 is hard-coded*)
+  if (List.length st.occupied_countries = 24) then (update_board_no_click st (startgame_populate_notification st); st) (*3 is hard-coded*)
  else
    let clicked = get graphics "clicker" [board] in
    if (bool_of_clicked clicked) then
@@ -191,7 +192,7 @@ let rec fortify_loop st =
   let cmd = make_fortify_command (string_of_clicked clicked) st in
   let st' = fortify cmd st in
   if (st = st') then fortify_loop st
-  else (update_board_no_click st' (reinforce_notification st');midgame_reinforce_loop st'))
+  else (update_board_with_click st' clicked (reinforce_notification st');midgame_reinforce_loop st'))
 
 let roll num_dice = if (num_dice = 1) then [(Random.int 6)+1]
   else if (num_dice = 2) then [((Random.int 6)+1); (Random.int 6)+1]
@@ -204,11 +205,14 @@ let find_2nd_max lst =
   | h1::h2::t -> h2
   | _ -> -1
 
-let rec get_click_two st =
+let rec get_click_two st clicked1 clicked1string =
   let clicked2 = get graphics "clicker" [board] in
   let clicked2string = (string_of_clicked clicked2) in
-  if (owns_country clicked2string st.occupied_countries st.player_turn = true)
-    then get_click_two st else (clicked2, clicked2string)
+  if (owns_country clicked2string st.occupied_countries st.player_turn = true && get_num_troops clicked2string st.occupied_countries > 1)
+  then get_click_two st clicked2 clicked2string
+  else if owns_country clicked2string st.occupied_countries st.player_turn = true
+  then (update_board_with_click st clicked1 (attack_notification_from st); ((Pystr "false",""),(Pystr "","")))
+  else ((clicked2, clicked2string),(clicked1,clicked1string))
 
 
 (* Creates an attack loop that can be existed if user hits end turn*)
@@ -218,12 +222,19 @@ let rec attack_loop st =   (*have to check if one side lost*)
   let clicked1string = (string_of_clicked clicked1) in
   if (clicked1string = "End turn") then (update_board_with_click st clicked1 (Pystr ""); st)
   else if (owns_country clicked1string st.occupied_countries st.player_turn <> true)
-  then ((update_board_with_click st clicked1 (attack_notification_from st)); attack_loop st) else
+  then ((update_board_with_click st clicked1 (attack_notification_from st)); attack_loop st)
+  else if get_num_troops clicked1string st.occupied_countries = 1
+  then ((update_board_with_click st clicked1 (attack_notification_from st)); attack_loop st)
+  else
   (update_board_with_click st clicked1 (attack_notification_to st);
 
-  let clicked2stringtuple = get_click_two st in
-  let clicked2 = fst clicked2stringtuple in
-  let clicked2string = snd clicked2stringtuple in
+  let clicked2stringtuple = get_click_two st clicked1 clicked1string in
+  if clicked2stringtuple = ((Pystr "false",""),(Pystr "","")) then attack_loop st
+  else
+  let clicked2 = fst (fst clicked2stringtuple) in
+  let clicked2string = snd (fst clicked2stringtuple) in
+  let clicked1 = fst (snd clicked2stringtuple) in
+  let clicked1string = snd (snd clicked2stringtuple) in
   if (clicked2string = "End turn") then st else
 
   let num_attackers = get_num_troops clicked1string st.occupied_countries in
@@ -246,7 +257,10 @@ let rec attack_loop st =   (*have to check if one side lost*)
         let cmd = make_attack_command (string_of_clicked clicked1) (string_of_clicked clicked2)
                                       (fst loser_lost) (snd loser_lost) st in
         let st2 = attack cmd st in
-        update_board_attack st2 clicked1 clicked2 (attack_notification_from st2);
+        (if (num_countries st2.player_turn st2.occupied_countries 0 > num_countries st.player_turn st.occupied_countries 0
+             && st2.player_turn.num_undeployed > 0) then
+           update_board_attack st2 clicked1 clicked2 (reinforce_notification st2) else
+           update_board_attack st2 clicked1 clicked2 (attack_notification_from st2));
         if num_countries st2.player_turn st2.occupied_countries 0 = 24 then st2
         else if num_countries st2.player_turn st2.occupied_countries 0 > num_countries st.player_turn st.occupied_countries 0 then
           let st3 = reinforce_till_occupied_attack st2 clicked1string clicked2string in
@@ -262,7 +276,7 @@ let rec attack_loop st =   (*have to check if one side lost*)
 let rec repl st has_won =
   if (has_won) then st (*display win message*)
   else
-    ((update_board_no_click st);
+    ((update_board_no_click st (Pystr ""));
     let st' = build_continent_list st in
     let st1 = trade_in st' in (update_board_no_click st1 (cash_in_notification st1)); Unix.sleep 2;
     let st1' = give_troops st1 in
@@ -270,12 +284,16 @@ let rec repl st has_won =
     let st2 = midgame_reinforce_loop (st1') in
     let st3 = attack_loop st2 in (update_board_no_click st3) (Pystr "");
     if num_countries st3.player_turn st3.occupied_countries 0 = 24 then repl st3 true else
-    let st4 = give_card st2 st3 in (update_board_no_click st4) (if st3 = st4 then Pystr "" else earn_card_notification st4); Unix.sleep 2;
+    let st4 = give_card st2 st3 in
+    (if st3 = st4 then update_board_no_click st4 (Pystr "") else (update_board_no_click st4 (earn_card_notification st4); Unix.sleep 2));
+      (* (update_board_no_click st4) (if st3 = st4 then Pystr "" else earn_card_notification st4); Unix.sleep 2; *)
     let st5 = fortify_loop st4 in (update_board_no_click st4) (Pystr "");
     (* let st6 = midgame_reinforce_loop st5 in *)
     let st6 = st5 in
     (* print_int (List.length st6.active_players); *)
-    let st6' = remove_player st6 in (update_board_no_click st6') (if st6 = st6' then Pystr "" else eliminated_notification st6'); Unix.sleep 2;
+    let st6' = remove_player st6 in
+    (if st6 = st6' then update_board_no_click st6' (Pystr "") else (update_board_no_click st6' (eliminated_notification st6'); Unix.sleep 2));
+    (* (update_board_no_click st6') (if st6 = st6' then Pystr "" else eliminated_notification st6'); Unix.sleep 2; *)
     (* print_int (List.length st6'.active_players); *)
     let st7 = next_player st6' in (update_board_no_click st7) (next_turn_notification st7); Unix.sleep 1;
     let won = check_if_win st7 in
@@ -330,10 +348,23 @@ let p4 = {
   dice_results;
   Pystr st1.player_turn.player_id];
   | _ -> failwith "Should not be here")
-); *)
+   ); *)
+
+let rec get_input () =
+  ANSITerminal.(print_string [green] ("How many players would you like to play with?\n> "));
+  let num_players = try (int_of_string (read_line ()))
+    with _ -> ANSITerminal.(print_string [red] ("\nPlease enter an integer from 2 to 4\n")); get_input ()
+  in if (num_players >= 2 && num_players <= 4) then num_players
+  else (ANSITerminal.(print_string [red] ("\nPlease enter an integer from 2 to 4\n")); get_input ())
 
 let () =
-  let i_state = init_state 4 [p1;p2;p3;p4] graphboard in
+  ANSITerminal.(print_string [green] ("Welcome to Big Red Risk!\n"));
+  let num_players = get_input () in
+  let player_list =
+  if (num_players = 2) then [{p1 with num_undeployed = 15};{p2 with num_undeployed = 15}]
+  else if num_players = 3 then [{p1 with num_undeployed = 10};{p2 with num_undeployed = 10};{p3 with num_undeployed = 10}]
+  else [{p1 with num_undeployed = 8};{p2 with num_undeployed = 8};{p3 with num_undeployed = 8};{p4 with num_undeployed = 8}] in
+  let i_state = init_state num_players player_list graphboard in
   update_notification (startgame_reinforce_notification i_state);
   let st1 = reinforce_until_occupied_loop i_state in
   let st2 = reinforce_occupied_loop st1 in
