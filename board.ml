@@ -11,6 +11,7 @@ type player = {
   num_undeployed: int;
   cards: card list;
   score: int;
+  ai: bool
 }
 
 type continent = {

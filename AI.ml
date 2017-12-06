@@ -3,44 +3,12 @@ open Risk_state
 
 type ai = player
 
-let ai1 = {
-  player_id = "AI1";
-  num_deployed = 0;
-  num_undeployed= 0;
-  cards = [];
-  score = 0;
-}
-
-let ai2 = {
-  player_id = "AI2";
-  num_deployed = 0;
-  num_undeployed = 0;
-  cards = [];
-  score = 0;
-}
-
-let ai3 = {
-  player_id = "AI3";
-  num_deployed = 0;
-  num_undeployed = 0;
-  cards = [];
-  score = 0;
-}
-
-let ai3 = {
-  player_id = "AI3";
-  num_deployed = 0;
-  num_undeployed = 0;
-  cards = [];
-  score = 0;
-}
-
 let rec get_occupied_countries player country_list acc =
   match country_list with
   | [] -> acc
   | (c, p, i) :: t -> if (p.player_id = player.player_id)
-    then get_occupied_countries player country_list ((c, p, i)::acc)
-    else get_occupied_countries player country_list acc
+    then (get_occupied_countries player t ((c, p, i)::acc))
+    else get_occupied_countries player t acc
 
 let rec go_to_element element_list i_random acc =
   match element_list with
@@ -77,19 +45,20 @@ let rec get_all_occupied_countries country_list acc =
   | [] -> acc
   | (c, p, i)::t -> get_all_occupied_countries t (c::acc)
 
-let rec get_unoccupied_countries occupied_countries all_countries acc =
-  match all_countries with
+let rec get_unoccupied_countries occupied_countries all_countries =
+  (* match all_countries with
   | [] -> acc
   | h::t -> if (List.mem h occupied_countries)
     then get_unoccupied_countries t all_countries (acc)
-    else get_unoccupied_countries t all_countries (h::acc)
+     else get_unoccupied_countries t all_countries (h::acc) *)
+  List.filter (fun x -> not (List.mem x occupied_countries)) all_countries
 
 let all_countries st = get_all_countries st.board []
 
 let get_random_unoccupied_country st =
   Random.init (int_of_float (Unix.time ()));
   let all_occupied_countries = get_all_occupied_countries st.occupied_countries [] in
-  let all_unoccupied_countries = get_unoccupied_countries all_occupied_countries (all_countries st) [] in
+  let all_unoccupied_countries = get_unoccupied_countries all_occupied_countries (all_countries st) in
   let random = Random.int (List.length (all_unoccupied_countries)) in
   go_to_element all_unoccupied_countries random 0
 
@@ -113,15 +82,15 @@ let rec get_sum_troops_in_bordering_countries occupied_countries current_player 
   match occupied_countries with
   | [] -> acc
   | (c, p, i)::t -> if (List.mem c.country_id country.bordering_countries && is_enemy_country c current_player occupied_countries)
-    then get_sum_troops_in_bordering_countries t current_player country (i+acc)
-    else get_sum_troops_in_bordering_countries t current_player country (acc)
+    then (get_sum_troops_in_bordering_countries t current_player country (i+acc))
+    else (get_sum_troops_in_bordering_countries t current_player country (acc))
 
 (*returns a tuple list of each country in in country_list bound to the difference between the number of troops in that
   country and the sum of the number of troops in that country's bordering countries*)
 let rec countries_and_enemies_difference st country_list acc =
   match country_list with
   | [] -> acc
-  | (c, p, i)::t -> countries_and_enemies_difference st t ((c, (get_sum_troops_in_bordering_countries st.occupied_countries st.player_turn c 0)-i)::acc)
+  | (c, p, i)::t -> (countries_and_enemies_difference st t ((c, (get_sum_troops_in_bordering_countries st.occupied_countries st.player_turn c 0)-i)::acc))
 
 let rec country_to_reinforce country_differences acc =
   match country_differences with
@@ -137,29 +106,38 @@ let rec ai_next_reinforce st =
 
 (*returns a tuple of [country], each enemy bordering country of [country], and the ratio between the number of troops
   in [country] and that bordering country*)
-let rec get_bordering_countries_with_troops occupied_countries current_player (country:(country*player*int)) acc =
+let rec get_bordering_countries_with_ratio occupied_countries current_player (country:(country*player*int)) acc =
   match occupied_countries, country with
   | [], _ -> acc
   | (c, p, i)::t, (c0,p0,i0) -> if (List.mem c.country_id c0.bordering_countries && is_enemy_country c current_player occupied_countries)
-    then get_bordering_countries_with_troops t current_player country ((c0, c, (float_of_int i0) /. (float_of_int i))::acc)
-    else get_bordering_countries_with_troops t current_player country (acc)
+    then get_bordering_countries_with_ratio t current_player country ((c0, c, (float_of_int i0) /. (float_of_int i))::acc)
+    else get_bordering_countries_with_ratio t current_player country (acc)
 
 let rec countries_and_enemies_ratio st country_list acc =
   match country_list with
   | [] -> acc
-  | h::t -> countries_and_enemies_ratio st t ((get_bordering_countries_with_troops st.occupied_countries st.player_turn h []) @ acc)
+  | h::t -> countries_and_enemies_ratio st t ((get_bordering_countries_with_ratio st.occupied_countries st.player_turn h []) @ acc)
 
 let rec country_to_attack country_ratios acc =
   match country_ratios with
   | [] -> acc (* is ("none", "none") by default*)
-  | (c_a, c_d, ratio)::t -> if (ratio > 1.2) then country_to_attack t (c_a.country_id, c_d.country_id)
+  | (c_a, c_d, ratio)::t -> if (ratio > 1.2) then (c_a.country_id, c_d.country_id)
     else country_to_attack t acc
 
 let rec ai_next_attack st : (string*string)=
   let occupied_countries = get_occupied_countries st.player_turn st.occupied_countries [] in
   let possible_attacks = countries_and_enemies_ratio st occupied_countries [] in
   let next_country = country_to_attack possible_attacks ("none", "none") in
-  next_country
+  print_endline ((fst next_country) ^ " " ^ (snd next_country)); next_country
+
+let ai_next_reinforce_after_attack st country_id1 country_id2 =
+  let country1 = get_country_assured (all_countries st) country_id1 in
+  let country2 = get_country_assured (all_countries st) country_id2 in
+  let country1_troops = get_num_troops country1.country_id st.occupied_countries in
+  let country2_troops = get_num_troops country2.country_id st.occupied_countries in
+  if (get_sum_troops_in_bordering_countries st.occupied_countries st.player_turn country1 0 - country1_troops
+      > get_sum_troops_in_bordering_countries st.occupied_countries st.player_turn country2 0 - country2_troops)
+  then country1.country_id else country2.country_id
 
 (*returns true if [country] has no enemy bordering countries, false otherwise*)
 let rec is_interior_country occupied_countries current_player country =

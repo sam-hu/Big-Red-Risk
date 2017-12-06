@@ -27,6 +27,7 @@ type player = {
   num_undeployed: int;
   cards: card list;
   score: int;
+  ai: bool
 }
 
 (* A [board] is a graph of countries where countries that border each other are

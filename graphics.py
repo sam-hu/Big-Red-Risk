@@ -1461,6 +1461,7 @@ turns, diceResults, currentPlayersTurn, notification):
         countriesDict[countryTuple2[0]][1].setText(countryTuple2[2])
 
     # Highlight the label of the player whose current turn it is
+
     for playerLabelTuple in playerNameLabels:
         if playerLabelTuple[1] == currentPlayersTurn:
             playerLabelTuple[0].setFill("green")

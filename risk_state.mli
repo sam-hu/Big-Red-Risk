@@ -77,3 +77,7 @@ val check_if_win: state -> bool
 val remove_player: state -> state
 
 val num_countries: Board.player -> (Board.country * Board.player * int) list -> int -> int
+
+val get_all_countries: Board.continent list -> Board.country list -> Board.country list
+
+val get_country_assured: Board.country list -> string -> Board.country
