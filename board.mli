@@ -34,8 +34,12 @@ type player = {
  * connected on the graph. *)
 type board = continent list
 
+(*[graphboard] is the main board we use for our game, modeled after the Cornell
+  campus*)
 val graphboard : board
 
+(*The following are profiles for players that will be controlled by humans
+  initialized to default values*)
 val p1: player
 
 val p2: player
