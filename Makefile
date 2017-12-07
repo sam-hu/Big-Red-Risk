@@ -4,12 +4,6 @@ test:
 play:
 	ocamlbuild -use-ocamlfind -pkgs lymp -tag thread simple.native && ./simple.native
 
-zip:
-	zip a2src.zip *.ml* *.json
-
-zipcheck:
-	bash checkzip.sh
-
 clean:
 	ocamlbuild -clean
 	rm -f checktypes.ml
