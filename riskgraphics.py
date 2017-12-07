@@ -258,7 +258,7 @@ def drawBoard():
     endTurn.draw(win)
 
     #cashCardReward.draw(win)
-    #turnsTaken.draw(win)
+    turnsTaken.draw(win)
     #diceResultLabel.draw(win)
 
     player_one = Text(Point(5,5),"Player 1")
@@ -569,7 +569,7 @@ turns, diceResults, currentPlayersTurn, notification):
     card_value.setText(str(cashReward))
 
     #cashCardReward.setText("Cash card reward is " + str(cashReward))
-    #turnsTaken.setText("Turns taken: " + str(turns))
+    turnsTaken.setText("Turns taken: " + str(turns) + "\nGame ends at 50 turns")
     #diceResultLabel.setText("Attacker rolled "+str(diceResults[0]) +
     #"\n Defender rolled " + str(diceResults[1]))
 

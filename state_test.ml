@@ -30,15 +30,6 @@ let p3 = {
   ratio = 0.0
 }
 
-let p3_after_trade = {
-  player_id = "player 3";
-  num_deployed = 0;
-  num_undeployed = 0;
-  cards = [];
-  ai = false;
-  ratio = 0.0
-}
-
 let p4 = {
   player_id = "player 4";
   num_deployed = 0;
@@ -112,17 +103,6 @@ let state2 = {
   board = board;
 }
 
-let state_with_new = {
-  num_players = 4;
-  player_turn = p1;
-  total_turns = 0;
-  active_players = players_new;
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
 let state_one_p = {
   num_players = 1;
   player_turn = p1;
@@ -137,17 +117,6 @@ let state_one_p = {
 let state3 = {
   num_players = 4;
   player_turn = p3;
-  total_turns = 0;
-  active_players = players;
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
-let state4 = {
-  num_players = 4;
-  player_turn = p4;
   total_turns = 0;
   active_players = players;
   reward = 5;
@@ -354,55 +323,11 @@ let make_trade_diff = {
   board = board;
 }
 
-let state_remove = {
-  num_players = 4;
-  player_turn = p4;
-  total_turns = 0;
-  active_players = players;
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
 let state_new = {
   num_players = 4;
   player_turn = p2;
   total_turns = 1;
   active_players = [{p2 with num_undeployed = 1}];
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
-let state2_new = {
-  num_players = 4;
-  player_turn = p2;
-  total_turns = 1;
-  active_players = players;
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
-let one_player = {
-  num_players = 4;
-  player_turn = p1;
-  total_turns = 0;
-  active_players = [p1];
-  reward = 5;
-  occupied_countries = [];
-  player_continents = [];
-  board = board;
-}
-
-let one_player_next = {
-  num_players = 4;
-  player_turn = p1;
-  total_turns = 1;
-  active_players = [p1];
   reward = 5;
   occupied_countries = [];
   player_continents = [];
@@ -417,8 +342,6 @@ let reinforce_begin_command = Reinforce "USA"
 
 let reinforce_begin_command2 = Reinforce "Cuba"
 
-let reinforce_cmd = Reinforce "USA"
-
 let tests =[
   (* tests for init_state make it fail when passed an empty case? *)
   "init_state" >:: (fun _ -> assert_equal state (init_state 4 players board));
@@ -431,7 +354,7 @@ let tests =[
   "begin_reinforce3" >:: (fun _ -> assert_equal state (init_state 4 players board |> reinforce_begin FalseReinforce));
 
   (*check turns*)
-  "reinforce 4" >:: (fun _ -> assert_equal reinforced_one_again (reinforced_one_again_prev |> reinforce reinforce_cmd));
+  "reinforce 4" >:: (fun _ -> assert_equal reinforced_one_again (reinforced_one_again_prev |> reinforce reinforce_begin_command));
   "reinforce 5" >:: (fun _ -> assert_equal reinforced_two_again (reinforced_two_again_prev |> reinforce reinforce_begin_command2));
   "reinforce 6" >:: (fun _ -> assert_equal state (init_state 4 players board |> reinforce FalseReinforce));
 

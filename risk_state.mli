@@ -93,6 +93,7 @@ val all_troops_deployed : player list -> bool
    in [occupied_list], false otherwise *)
 val owns_country: string -> (Board.country*Board.player*int) list -> Board.player -> bool
 
+(* Returns true if there is a winner in [st], false otherwise *)
 val check_if_win: state -> bool
 
 (* returns new state with players that have 0 occupied countries removed from
@@ -109,4 +110,5 @@ val get_all_countries: Board.continent list -> Board.country list -> Board.count
  * Precondition: [target] is in country_list *)
 val get_country_assured: Board.country list -> string -> Board.country
 
+(* returns true if the command is Reinforce, false if it is FalseReinforce *)
 val is_reinforce: Command.reinforce_command -> bool

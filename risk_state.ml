@@ -254,7 +254,6 @@ let next_player_player st =
   |[] -> failwith "0 players?"
   |h::[] -> h
   |h::h2::[] -> if h = st.player_turn then h2 else h
-  (* if h = st.player_turn then h2 else h *)
   |h::h2::h3::[] -> if h = st.player_turn then h2
     else if h2 = st.player_turn then h3 else h
   |h::h2::h3::h4::[] -> if h = st.player_turn then h2

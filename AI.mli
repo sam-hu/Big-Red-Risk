@@ -26,6 +26,8 @@ val ai_next_reinforce_after_attack : state -> string -> string -> string
   wants to fortify in st *)
 val ai_next_fortify : state -> string
 
+val get_my_countries : ai -> (Board.country*Board.player*int) list -> (Board.country*Board.player*int) list -> (Board.country*Board.player*int) list
+
 (*The following are profiles for players that will be controlled by AIs
   initialized to default values *)
 val ai1: ai

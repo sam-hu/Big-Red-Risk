@@ -101,8 +101,8 @@ let update_dice attdice defdice =
 
 let update_notification (notification) =
   call riskgraphics "updateNotificationBar" [notification]
-let end_game_state (st) =
-  call riskgraphics "endgame" [board;Pystr st.player_turn.player_id]
+let end_game_state (winner) =
+  call riskgraphics "endgame" [board;Pystr winner]
 let update_done_highlight (inputTuple) =
   call riskgraphics "updateOutlines" [inputTuple]
 
@@ -407,13 +407,25 @@ let rec attack_loop st = Random.init (int_of_float (Unix.time ()));
                     clicked1string clicked2string in attack_loop st3
               else attack_loop (st2)))
 
+(* returns the player who owns the most countries in [st] *)
+let rec get_winner player_list st acc =
+  match player_list with
+  |[] -> acc
+  |h::t ->
+    if (List.length (get_my_countries h st.occupied_countries []) > snd acc)
+    then get_winner t st
+        (h, List.length (get_my_countries h st.occupied_countries []))
+    else get_winner t st acc
+
 (* [repl st has_won] is the heart of the game's REPL. It performs all actions
    in the RISK Board Game systematically for every player. It is initially
    called with an initial state for [st] and a False for [has_won], and is
    called recursively until [has_won] is true
    Preconditions: [st] is a valid state *)
 let rec repl st has_won =
-  if (has_won) then end_game_state (st) else
+  if (has_won || st.total_turns = 50) then
+    end_game_state (fst (get_winner st.active_players st
+                           (List.hd st.active_players, 0))).player_id else
     ((update_board_no_click st (Pystr "")); let st' = build_continent_list st in
      let st1 = trade_in st' in
      (update_board_no_click st1 (cash_in_notification st1)); Unix.sleep 2;
