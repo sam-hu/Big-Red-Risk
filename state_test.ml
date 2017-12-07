@@ -8,7 +8,8 @@ let p1 = {
   num_deployed = 0;
   num_undeployed = 0;
   cards = [];
-  score = 0;
+  ai = false;
+  ratio = 0.0
 }
 
 let p2 = {
@@ -16,26 +17,50 @@ let p2 = {
   num_deployed = 0;
   num_undeployed = 0;
   cards = [];
-  score = 0;
+  ai = false;
+  ratio = 0.0
 }
 
 let p3 = {
   player_id = "player 3";
   num_deployed = 0;
   num_undeployed = 0;
+  cards = [Circle; Circle; Circle];
+  ai = false;
+  ratio = 0.0
+}
+
+let p3_after_trade = {
+  player_id = "player 3";
+  num_deployed = 0;
+  num_undeployed = 0;
   cards = [];
-  score = 0;
+  ai = false;
+  ratio = 0.0
 }
 
 let p4 = {
   player_id = "player 4";
   num_deployed = 0;
   num_undeployed = 0;
+  cards = [Circle; Triangle; Square];
+  ai = false;
+  ratio = 0.0
+}
+
+let p_new = {
+  player_id = "player new";
+  num_deployed = 0;
+  num_undeployed = 3;
   cards = [];
-  score = 0;
+  ai = false;
+  ratio = 0.0
 }
 
 let players = [p1;p2;p3;p4]
+let players2 = [p1;p2;p3]
+let player_one = [p1]
+let players_new = [p1;p2;p_new;p3]
 
 let country1 = {
   country_id = "USA";
@@ -72,18 +97,40 @@ let state = {
   active_players = players;
   reward = 5;
   occupied_countries = [];
-  occupied_continents = [];
+  player_continents = [];
   board = board;
 }
 
 let state2 = {
-  num_players = 4;
-  player_turn = p2;
+  num_players = 3;
+  player_turn = p1;
   total_turns = 0;
-  active_players = players;
+  active_players = players2;
   reward = 5;
   occupied_countries = [];
-  occupied_continents = [];
+  player_continents = [];
+  board = board;
+}
+
+let state_with_new = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = players_new;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let state_one_p = {
+  num_players = 1;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = player_one;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
   board = board;
 }
 
@@ -94,7 +141,7 @@ let state3 = {
   active_players = players;
   reward = 5;
   occupied_countries = [];
-  occupied_continents = [];
+  player_continents = [];
   board = board;
 }
 
@@ -105,176 +152,342 @@ let state4 = {
   active_players = players;
   reward = 5;
   occupied_countries = [];
-  occupied_continents = [];
+  player_continents = [];
   board = board;
 }
 
 let before_attack = {
-  num_players = 4;
-  player_turn = p1;
+  num_players = 3;
+  player_turn = {p1 with num_deployed = 3};
   total_turns = 0;
-  active_players = players;
+  active_players = [{p1 with num_deployed = 3};{p2 with num_deployed = 2};p3];
   reward = 5;
-  occupied_countries = [(country1, p1, 3);(country2, p2, 4);(country3, p3, 2)];
-  occupied_continents = [];
+  occupied_countries = [(country1, p1, 3);(country2, p2, 2);(country3, p3, 2)];
+  player_continents = [];
   board = board;
 }
 
 let after_attack = {
-  num_players = 4;
-  player_turn = p1;
+  num_players = 3;
+  player_turn = {p1 with num_deployed = 2; num_undeployed = 1};
   total_turns = 0;
-  active_players = players;
+  active_players = [{p1 with num_deployed = 2; num_undeployed = 1};{p2 with num_deployed = 0};{p3 with num_deployed = 2}];
   reward = 5;
-  occupied_countries = [(country1, p1, 2);(country2, p1, 1);(country3, p3, 2)];
-  occupied_continents = [];
+  occupied_countries = [(country1, {p1 with num_deployed = 2; num_undeployed = 1}, 1);(country2, {p1 with num_deployed = 2; num_undeployed = 1}, 1);(country3, p3, 2)];
+  player_continents = [];
+  board = board;
+}
+
+let before_remove = {
+  num_players = 3;
+  player_turn = {p1 with num_deployed = 2; num_undeployed = 1};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 2; num_undeployed = 1};{p2 with num_deployed = 0};{p3 with num_deployed = 2}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 2; num_undeployed = 1}, 1);(country2, {p1 with num_deployed = 2; num_undeployed = 1}, 1);(country3, {p3 with num_deployed = 2}, 2)];
+  player_continents = [];
+  board = board;
+}
+
+let before_attack_two = {
+  num_players = 3;
+  player_turn = {p1 with num_deployed = 3};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 3};{p2 with num_deployed = 4};{p3 with num_deployed = 2}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 3}, 3);(country2, {p2 with num_deployed = 4}, 4);(country3, {p3 with num_deployed = 2}, 2)];
+  player_continents = [];
+  board = board;
+}
+
+let after_attack_two = {
+  num_players = 3;
+  player_turn = {p1 with num_deployed = 2};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 2};{p2 with num_deployed = 4};{p3 with num_deployed = 1}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 2}, 2);(country2, {p2 with num_deployed = 4}, 4);(country3, {p3 with num_deployed = 1}, 1)];
+  player_continents = [];
   board = board;
 }
 
 let reinforced_one = {
   num_players = 4;
-  player_turn = p1;
+  player_turn = p2;
   total_turns = 0;
-  active_players = players;
+  active_players = [{p1 with num_deployed = 1; num_undeployed = -1};p2;p3;p4];
   reward = 5;
-  occupied_countries = [(country1, p1, 1)];
-  occupied_continents = [];
+  occupied_countries = [(country1, {p1 with num_deployed = 1; num_undeployed = -1}, 1)];
+  player_continents = [];
   board = board;
 }
 
-let attack_command = Attack ("USA","Canada",Right,-4)
+let reinforced_one_again_prev = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 1; num_undeployed = -1};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 1; num_undeployed = -1};p2;p3;p4];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 1; num_undeployed = -1}, 1)];
+  player_continents = [];
+  board = board;
+}
+
+let reinforced_one_again = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 2; num_undeployed = -2};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 2; num_undeployed = -2};p2;p3;p4];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 2; num_undeployed = -2}, 2)];
+  player_continents = [];
+  board = board;
+}
+
+let reinforced_two = {
+  num_players = 4;
+  player_turn = p2;
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 1; num_undeployed = -1};p2;p3];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 1; num_undeployed = -1}, 1)];
+  player_continents = [];
+  board = board;
+}
+
+let reinforced_two_again_prev = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 1; num_undeployed = -1};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 1; num_undeployed = -1};p2;p3];
+  reward = 5;
+  occupied_countries = [(country4, {p1 with num_deployed = 1; num_undeployed = -1}, 1)];
+  player_continents = [];
+  board = board;
+}
+
+let reinforced_two_again = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 2; num_undeployed = -2};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 2; num_undeployed = -2};p2;p3];
+  reward = 5;
+  occupied_countries = [(country4, {p1 with num_deployed = 2; num_undeployed = -2}, 2)];
+  player_continents = [];
+  board = board;
+}
+
+let fortify_one = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 4};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 4}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 4}, 3);(country3,{p1 with num_deployed = 4},1)];
+  player_continents = [];
+  board = board;
+}
+
+let fortify_one_after = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 2; num_undeployed = 2};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 2; num_undeployed = 2}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 2; num_undeployed = 2}, 1);(country3,{p1 with num_deployed = 2; num_undeployed = 2},1)];
+  player_continents = [];
+  board = board;
+}
+
+let fortify_before = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 8};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 8}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 8}, 3);(country3,{p1 with num_deployed = 8},5)];
+  player_continents = [];
+  board = board;
+}
+
+let fortify_after = {
+  num_players = 4;
+  player_turn = {p1 with num_deployed = 4; num_undeployed = 4};
+  total_turns = 0;
+  active_players = [{p1 with num_deployed = 4; num_undeployed = 4}];
+  reward = 5;
+  occupied_countries = [(country1, {p1 with num_deployed = 4; num_undeployed = 4}, 3);(country3,{p1 with num_deployed = 4; num_undeployed = 4},1)];
+  player_continents = [];
+  board = board;
+}
+
+let make_trade_state = {
+  num_players = 4;
+  player_turn = p3;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let trade_in_state = {
+  num_players = 4;
+  player_turn = p3;
+  total_turns = 0;
+  active_players = players;
+  reward = 10;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let make_trade_diff = {
+  num_players = 4;
+  player_turn = p4;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let state_remove = {
+  num_players = 4;
+  player_turn = p4;
+  total_turns = 0;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let state_new = {
+  num_players = 4;
+  player_turn = p2;
+  total_turns = 1;
+  active_players = [{p2 with num_undeployed = 1}];
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let state2_new = {
+  num_players = 4;
+  player_turn = p2;
+  total_turns = 1;
+  active_players = players;
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let one_player = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 0;
+  active_players = [p1];
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let one_player_next = {
+  num_players = 4;
+  player_turn = p1;
+  total_turns = 1;
+  active_players = [p1];
+  reward = 5;
+  occupied_countries = [];
+  player_continents = [];
+  board = board;
+}
+
+let attack_command = Attack ("USA","Canada",Right,-2)
+
+let attack_command_two = Attack ("USA","Mexico",Both,-1)
 
 let reinforce_begin_command = Reinforce "USA"
 
 let reinforce_begin_command2 = Reinforce "Cuba"
 
+let reinforce_cmd = Reinforce "USA"
+
 let tests =[
-  "init_state" >:: (fun _ -> assert_equal state (init_state 4 players));
-  "next player" >:: (fun _ -> assert_equal state (state |> next_player |> next_player |> next_player |> next_player));
-  "next player2" >:: (fun _ -> assert_equal state2 (state |> next_player));
-  "next player3" >:: (fun _ -> assert_equal state3 (init_state 4 players |> next_player |> next_player));
+  (* tests for init_state make it fail when passed an empty case? *)
+  "init_state" >:: (fun _ -> assert_equal state (init_state 4 players board));
+  "init_state2" >:: (fun _ -> assert_equal state2 (init_state 3 players2 board));
+  "init_state3" >:: (fun _ -> assert_equal state_one_p (init_state 1 player_one board));
+
+  (* tests for reinforce*)
+  "begin_reinforce1" >:: (fun _ -> assert_equal reinforced_one (init_state 4 players board |> reinforce_begin reinforce_begin_command));
+  "begin_reinforce2" >:: (fun _ -> assert_equal reinforced_two (init_state 4 players2 board |> reinforce_begin reinforce_begin_command));
+  "begin_reinforce3" >:: (fun _ -> assert_equal state (init_state 4 players board |> reinforce_begin FalseReinforce));
+
+  (*check turns*)
+  "reinforce 4" >:: (fun _ -> assert_equal reinforced_one_again (reinforced_one_again_prev |> reinforce reinforce_cmd));
+  "reinforce 5" >:: (fun _ -> assert_equal reinforced_two_again (reinforced_two_again_prev |> reinforce reinforce_begin_command2));
+  "reinforce 6" >:: (fun _ -> assert_equal state (init_state 4 players board |> reinforce FalseReinforce));
+
+  (* tests for next player*)
+  "next player" >:: (fun _ -> assert_equal {state with total_turns = 1} (state |> next_player |> next_player |> next_player |> next_player));
+  "next player 2" >:: (fun _ -> assert_equal {state2 with player_turn = p2} (state2 |> next_player));
+  "next player 3" >:: (fun _ -> assert_equal state3 (init_state 4 players board |> next_player |> next_player));
+
+  (* tests for attack (check what Right and Left) *)
   "attack 1" >:: (fun _ -> assert_equal after_attack (attack attack_command before_attack));
-  "reinforce first" >:: (fun _ -> assert_equal reinforced_one (init_state 4 players |> reinforce_begin reinforce_begin_command))
+  "attack 2" >:: (fun _ -> assert_equal after_attack_two (attack attack_command_two before_attack_two));
+  "attack 3" >:: (fun _ -> assert_equal before_attack (attack FalseAttack before_attack));
 
+  (* tests for fortify*)
+  "fortify 1" >:: (fun _ -> assert_equal state (fortify FalseFortify state));
+  "fortify 2" >:: (fun _ -> assert_equal fortify_one_after (fortify (Fortify "USA") fortify_one));
+  "fortify 3" >:: (fun _ -> assert_equal fortify_after (fortify (Fortify "Mexico") fortify_before));
 
-  (* tests init_state function to see if all values are initialized properly for "threeroom.json"*)
-  (* "1: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> win_score));
-  "1: start_score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> score));
-  "1: start_turns" >:: (fun _ -> assert_equal 0 (j |> init_state |> turns));
-  "1: start_room" >:: (fun _ -> assert_equal "room1" (j |> init_state |> current_room_id));
-  "1: start_inv" >:: (fun _ -> assert_equal ["white hat"] (j |> init_state |> inv));
-  "1: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j |> init_state |> visited));
-  "1: start_locations" >:: (fun _ -> assert_equal [("room2", "key");
-                                                ("room1", "red hat");
-                                                ("room1", "black hat")]
-                            (j |> init_state |> locations));
-  (* tests init_state function to see if all values are initialized properly for "oneroom.json"*)
-  "2: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> win_score));
-  "2: start_score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> score));
-  "2: start_turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> turns));
-  "2: start_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> current_room_id));
-  "2: start_inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> inv));
-  "2: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> visited));
-  "2: start_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> locations));
-  (* tests init_state function to see if all values are initialized properly for "GameOfThronesAdventure.json"*)
-  "3: max" >:: (fun _ -> assert_equal 72650 (gotj |> init_state |> win_score));
-  "3: start_score" >:: (fun _ -> assert_equal 0 (gotj |> init_state |> score));
-  "3: start_turns" >:: (fun _ -> assert_equal 0 (gotj |> init_state |> turns));
-  "3: start_room" >:: (fun _ -> assert_equal "winterfell" (gotj |> init_state |> current_room_id));
-  "3: start_inv" >:: (fun _ -> assert_equal [] (gotj |> init_state |> inv));
-  "3: rooms_visited" >:: (fun _ -> assert_equal ["winterfell"] (gotj |> init_state |> visited));
-  "3: start_locations" >:: (fun _ ->
-      assert_equal [("kings landing", "ned stark"); ("casterly rock", "food");
-                    ("casterly rock", "army"); ("wendish town", "treasure map");
-                    ("iron islands", "water"); ("iron islands", "theon grayjoy");
-                    ("stony shore", "gold"); ("stony shore", "warriors");
-                    ("castle black", "john snow"); ("winterfell", "whitewalker scroll");
-                    ("winterfell", "sword")] (gotj |> init_state |> locations));
-  (* tests the effects of the quit commmand on "oneroom.json"*)
-  "4: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' quitCommand |> win_score));
-  "4: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' quitCommand |> score));
-  "4: turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> do' quitCommand |> turns));
-  "4: current_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> do' quitCommand |> current_room_id));
-  "4: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' quitCommand |> inv));
-  "4: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' quitCommand |> visited));
-  "4: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' quitCommand |> locations));
-  (* tests the effects of the look commmand on "oneroom.json"*)
-  "5: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' lookCommand |> win_score));
-  "5: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' lookCommand |> score));
-  "5: turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> do' lookCommand |> turns));
-  "5: current_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> do' lookCommand |> current_room_id));
-  "5: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' lookCommand |> inv));
-  "5: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' lookCommand |> visited));
-  "5: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' lookCommand |> locations));
-  (* tests the effects of the score commmand on "oneroom.json"*)
-  "5b: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' scoreCommand |> win_score));
-  "5b: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' scoreCommand |> score));
-  "5b: turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> do' scoreCommand |> turns));
-  "5b: current_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> do' scoreCommand |> current_room_id));
-  "5b: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' scoreCommand |> inv));
-  "5b: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' scoreCommand |> visited));
-  "5b: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' scoreCommand |> locations));
-  (* tests the effects of the turns commmand on "oneroom.json"*)
-  "5c: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' turnsCommand |> win_score));
-  "5c: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' turnsCommand |> score));
-  "5c: turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> do' turnsCommand |> turns));
-  "5c: current_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> do' turnsCommand |> current_room_id));
-  "5c: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' turnsCommand |> inv));
-  "5c: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' turnsCommand |> visited));
-  "5c: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' turnsCommand |> locations));
-  (* tests the effects of an invalid command on "oneroom.json"*)
-  "5d: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' invalidCommand |> win_score));
-  "5d: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' invalidCommand |> score));
-  "5d: turns" >:: (fun _ -> assert_equal 0 (j2 |> init_state |> do' invalidCommand |> turns));
-  "5d: current_room" >:: (fun _ -> assert_equal "room1" (j2 |> init_state |> do' invalidCommand |> current_room_id));
-  "5d: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' invalidCommand |> inv));
-  "5d: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' invalidCommand |> visited));
-  "5d: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' invalidCommand |> locations));
-  (* tests the effects of the inv commmand on "threerooms.json"*)
-  "6: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' invCommand |> win_score));
-  "6: score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> do' invCommand |> score));
-  "6: turns" >:: (fun _ -> assert_equal 0 (j |> init_state |> do' invCommand |> turns));
-  "6: current_room" >:: (fun _ -> assert_equal "room1" (j |> init_state |> do' invCommand |> current_room_id));
-  "6: inv" >:: (fun _ -> assert_equal ["white hat"] (j |> init_state |> do' invCommand |> inv));
-  "6: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j |> init_state |> do' invCommand |> visited));
-  "6: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
-                                                ("room1", "red hat");
-                                                ("room1", "black hat")]
-                               (j |> init_state |> do' invCommand |> locations));
-  (* tests the effects of "take black hat" commmand on "threerooms.json"*)
-  "7: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' takeCommand |> win_score));
-  "7: score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> do' takeCommand |> score));
-  "7: turns" >:: (fun _ -> assert_equal 1 (j |> init_state |> do' takeCommand |> turns));
-  "7: current_room" >:: (fun _ -> assert_equal "room1" (j |> init_state |> do' takeCommand |> current_room_id));
-  "7: inv" >:: (fun _ -> assert_equal ["white hat";"black hat"] (j |> init_state |> do' takeCommand |> inv));
-  "7: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j |> init_state |> do' takeCommand |> visited));
-  "7: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
-                                                ("room1", "red hat");]
-                              (j |> init_state |> do' takeCommand |> locations));
-  (* tests the effects of "drop white hat" commmand on "threerooms.json"*)
-  "8: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' dropCommand |> win_score));
-  "8: score" >:: (fun _ -> assert_equal 11001 (j |> init_state |> do' dropCommand |> score));
-  "8: turns" >:: (fun _ -> assert_equal 1 (j |> init_state |> do' dropCommand |> turns));
-  "8: current_room" >:: (fun _ -> assert_equal "room1" (j |> init_state |> do' dropCommand |> current_room_id));
-  "8: inv" >:: (fun _ -> assert_equal [] (j |> init_state |> do' dropCommand |> inv));
-  "8: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j |> init_state |> do' dropCommand |> visited));
-  "8: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
-                                                ("room1", "red hat");
-                                                  ("room1", "black hat");
-                                                 ("room1","white hat")]
-                              (j |> init_state |> do' dropCommand |> locations));
-  (* tests the effects of "go room2" commmand on "threerooms.json"*)
-  "9: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' goCommand |> win_score));
-  "9: score" >:: (fun _ -> assert_equal 10011 (j |> init_state |> do' goCommand |> score));
-  "9: turns" >:: (fun _ -> assert_equal 1 (j |> init_state |> do' goCommand |> turns));
-  "9: current_room" >:: (fun _ -> assert_equal "room2" (j |> init_state |> do' goCommand |> current_room_id));
-  "9: inv" >:: (fun _ -> assert_equal ["white hat"] (j |> init_state |> do' goCommand |> inv));
-  "9: rooms_visited" >:: (fun _ -> assert_equal ["room2";"room1"] (j |> init_state |> do' goCommand |> visited));
-  "9: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
-                                                ("room1", "red hat");
-                                                ("room1", "black hat")]
-                              (j |> init_state |> do' goCommand |> locations));*)
+  (* tests for make_trade_command *)
+  "trade1" >:: (fun _ -> assert_equal (Same Circle) (make_trade_command make_trade_state));
+  "trade2" >:: (fun _ -> assert_equal Different (make_trade_command make_trade_diff));
+  "trade3" >:: (fun _ -> assert_equal NoTrade (make_trade_command state));
+
+  (* tests for trade_in *)
+  "trade_in1" >:: (fun _ -> assert_equal [] (trade_in (Same Circle) make_trade_state).player_turn.cards);
+  "trade_in2" >:: (fun _ -> assert_equal [] (trade_in Different make_trade_diff).player_turn.cards);
+  "trade_in3" >:: (fun _ -> assert_equal state (trade_in  NoTrade state));
+
+  (* tests for make reinforce command *)
+  "make_reinforce1" >:: (fun _ -> assert_equal true (make_reinforce_command "USA" before_attack |> is_reinforce));
+  "make_reinforce2" >:: (fun _ -> assert_equal false (make_reinforce_command "Cuba" reinforced_two |> is_reinforce));
+  "make_reinforce3" >:: (fun _ -> assert_equal FalseReinforce (make_reinforce_command "USA" state));
+
+  (* tests for give troops*)
+  "give1" >:: (fun _ -> assert_equal 3 (give_troops state).player_turn.num_undeployed);
+  "give2" >:: (fun _ -> assert_equal 3 (give_troops state2).player_turn.num_undeployed);
+
+  (* tests for remove player*)
+  "remove1" >:: (fun _ -> assert_equal [{p1 with num_deployed = 2; num_undeployed = 1};{p3 with num_deployed = 2}] (remove_player before_remove).active_players);
+  "remove2" >:: (fun _ -> assert_equal [] (remove_player state).active_players);
+  "remove3" >:: (fun _ -> assert_equal [] (remove_player state2).active_players);
+
+  (* tests for owns_country*)
+  "owns1" >:: (fun _ -> assert_equal true (owns_country "USA" before_attack.occupied_countries p1));
+  "owns2" >:: (fun _ -> assert_equal true (owns_country "Mexico" after_attack.occupied_countries p3));
+  "owns3" >:: (fun _ -> assert_equal false (owns_country "USA" state.occupied_countries p2));
+
+  (* tests for all troops deployed*)
+  "deployed1" >:: (fun _ -> assert_equal true (all_troops_deployed state.active_players));
+  "deployed2" >:: (fun _ -> assert_equal true (all_troops_deployed state2.active_players));
+  "deployed3" >:: (fun _ -> assert_equal false (all_troops_deployed state_new.active_players));
 ]
+
+(**)
+
+
 
 let suite =
   "Adventure test suite"

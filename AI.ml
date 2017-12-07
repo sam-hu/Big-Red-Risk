@@ -244,11 +244,16 @@ let ai_next_reinforce_after_attack st country_id1 country_id2 =
     get_num_troops country1.country_id st.occupied_countries in
   let country2_troops =
     get_num_troops country2.country_id st.occupied_countries in
-  if (get_sum_border_troops
-        st.occupied_countries st.player_turn country1 0 - country1_troops
-      > get_sum_border_troops
-        st.occupied_countries st.player_turn country2 0 - country2_troops)
-  then country1.country_id else country2.country_id
+  let country_1_border = get_sum_border_troops
+      st.occupied_countries st.player_turn country1 0 in
+  let country_2_border = get_sum_border_troops
+      st.occupied_countries st.player_turn country2 0 in
+  if country_1_border = 0 then country2.country_id
+  else if country_2_border = 0 then country1.country_id
+  else if (country_1_border - country1_troops
+      > country_2_border - country2_troops)
+  then country1.country_id
+  else country2.country_id
 
 (*[country_to_fortify_from interior_countries acc] is the country in
   [interior_countries] that is occupied by the most troops *)

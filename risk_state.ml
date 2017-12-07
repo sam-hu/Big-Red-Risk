@@ -24,6 +24,8 @@ let init_state player_num players brd = {
   board = brd;
 }
 
+let is_reinforce cmd = match cmd with FalseReinforce->false | Reinforce c->true
+
 let rec owns_country country_string occupied_list player =
   match occupied_list with
   |[] -> false
@@ -182,13 +184,12 @@ let reinforce (cmd: reinforce_command) (st: state) =
   match cmd with
   | FalseReinforce -> st
   | Reinforce c ->
-    let st' =
-      {st with player_turn =
-                 {st.player_turn with
-                  num_deployed = st.player_turn.num_deployed + 1;
-                  num_undeployed = st.player_turn.num_undeployed - 1};
-               occupied_countries =
-                 update_countries st.occupied_countries c 1 []} in
+    let st' = {st with player_turn =
+                         {st.player_turn with
+                          num_deployed = st.player_turn.num_deployed + 1;
+                          num_undeployed = st.player_turn.num_undeployed - 1};
+                       occupied_countries =
+                         update_countries st.occupied_countries c 1 []} in
     {st' with
      active_players =
        update_player st.player_turn st'.player_turn st'.active_players [];
@@ -271,7 +272,7 @@ let reinforce_begin cmd st =
                           num_undeployed = st.player_turn.num_undeployed - 1} in
     {st with player_turn = next_player_player st;
              occupied_countries =
-               (country, st.player_turn, 1)::st.occupied_countries;
+               (country, player_updated, 1)::st.occupied_countries;
              active_players =
                update_player st.player_turn player_updated st.active_players []}
 

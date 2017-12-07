@@ -108,3 +108,5 @@ val get_all_countries: Board.continent list -> Board.country list -> Board.count
 (* returns the country in [country_list] with country_id [target]
  * Precondition: [target] is in country_list *)
 val get_country_assured: Board.country list -> string -> Board.country
+
+val is_reinforce: Command.reinforce_command -> bool

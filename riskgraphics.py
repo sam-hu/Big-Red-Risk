@@ -613,11 +613,23 @@ turns, diceResults, currentPlayersTurn, notification):
     updatePlayerLabels(currentPlayersTurn,("",True))
 
 def endgame(win,player_id):
-    rec = Rectangle(Point(10,10),Point(90,90))
-    rec.setFill("gray")
-    rec.draw(win)
+    # rec = Rectangle(Point(10,10),Point(90,90))
+    # rec.setFill("gray")
+    # rec.draw(win)
 
-    win.getMouse()
+    end = Image(Point(50,50),"end.ppm")
+    endtext = Text(Point(50,85), "Congratulations " + player_id + "! You have conquered Cornell!!")
+    endtext.setTextColor("#FC0C0C")
+    endtext.setSize(32)
+    endtext.setStyle("bold")
+    end.draw(win)
+    endtext.draw(win)
+
+    try:
+        clicked = win.getMouse()
+    except:
+        win.close()
+        return ("Exit",False)
 
 
 ### End of Risk: Final Project Code ###
