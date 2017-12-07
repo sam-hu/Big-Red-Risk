@@ -551,13 +551,15 @@ def updateOutlines(inputTuple):
 
 def update(win, countryTuple, cardAmounts, cashReward,
 turns, diceResults, currentPlayersTurn, notification):
-    # Set notification bar to current click
-    updateNotificationBar(notification)
+
 
     # Color board according to what players own and add troops to each country
     if (countryTuple != None):
         countriesDict[countryTuple[0]][0].setFill(playerIDDict[countryTuple[1]])
         countriesDict[countryTuple[0]][1].setText(countryTuple[2])
+
+    # Set notification bar to current click
+    updateNotificationBar(notification)
 
     # Display card amounts for each player
     for cardTuple in cardAmounts:
