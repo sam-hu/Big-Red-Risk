@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/psbang008/.opam/4.05.0/lib/lymp/lymp.py", line 87, in loop
+    ret = self.execute_instruction(instruction)
+  File "/Users/psbang008/.opam/4.05.0/lib/lymp/lymp.py", line 197, in execute_instruction
+    ret = func_or_attr(*args, **named)
+  File "/Users/psbang008/Desktop/RiskBoardGame/riskgraphics.py", line 486, in updateDice
+    attack1.draw(win)
+  File "/Users/psbang008/Desktop/RiskBoardGame/graphics.py", line 483, in draw
+    if graphwin.isClosed(): raise GraphicsError("Can't draw to closed window")
+graphics.GraphicsError: Can't draw to closed window

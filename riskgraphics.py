@@ -340,11 +340,20 @@ def drawBoard():
 
 
 def clicker(win):
+    global _root
     whichSquareList = []
     buttonTuple = ("",False)
 
     while(len(whichSquareList) < 1):
-        clicked = win.getMouse()
+
+
+        try:
+            clicked = win.getMouse()
+        except:
+            win.close()
+            return ("Exit",False)
+
+
         if (clicked.getX() >= 7 and clicked.getX() <= 12 and
         clicked.getY() >= 32 and clicked.getY() <= 38):
             whichSquareList.append("Keeton")

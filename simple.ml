@@ -41,14 +41,16 @@ let rec card_amounts_python player_list acc =
 (* Get string of the current click*)
 let string_of_clicked clicked =
   match clicked with
-    | Pytuple [Pystr strin; Pybool b] -> strin
-    | _ -> failwith "Should not be here"
+  | Pytuple [Pystr strin; Pybool b] -> if strin = "Exit" then
+      (Pervasives.print_endline "\nYou've quit Big Red Risk..."; exit 0) else strin
+    | _ -> failwith "Should not be here1"
 
 (* Get boolean of the current click*)
 let bool_of_clicked clicked =
   match clicked with
-    | Pytuple [Pystr str; Pybool b] -> b
-    | _ -> failwith "Should not be here"
+  | Pytuple [Pystr str; Pybool b] -> if str = "Exit" then
+      (Pervasives.print_endline "\nYou've quit Big Red Risk..."; exit 0) else b
+    | _ -> failwith "Should not be here2"
 
 (* Get a click action from the user as a tuple (string,bool), with [string]
    representing the name of the country/button and bool is True if the click
@@ -70,7 +72,7 @@ let update_board_with_click the_state clicked notification=
        card_amounts_python the_state.active_players [];Pyint the_state.reward;
        Pyint the_state.total_turns;dice_results;
        Pystr the_state.player_turn.player_id;notification];
-  | _ -> failwith "Should not be here"
+  | _ -> failwith "Should not be here3"
 
   (* Updates the riskgraphics of board without a click*)
 let update_board_no_click the_state notification =
@@ -89,11 +91,13 @@ let update_board_attack the_state clicked1 clicked2 notification =
        card_amounts_python the_state.active_players [];Pyint the_state.reward;
        Pyint the_state.total_turns;dice_results;
        Pystr the_state.player_turn.player_id;notification];
-  | _ -> failwith "Should not be here"
+  | _ -> failwith "Should not be here4"
 
 let update_dice attdice defdice =
-  call riskgraphics "updateDice"
-    [roll_to_python attdice [];roll_to_python defdice [];board]
+  try
+  (call riskgraphics "updateDice"
+     [roll_to_python attdice [];roll_to_python defdice [];board])
+  with _ -> (Pervasives.print_endline "\nYou've quit Big Red Risk..."; exit 0)
 
 let update_notification (notification) =
   call riskgraphics "updateNotificationBar" [notification]
