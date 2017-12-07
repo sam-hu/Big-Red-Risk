@@ -151,7 +151,7 @@ let cash_in_notification st =
 let is_ai st = if (st.player_turn.ai) then true else false
 
 (* Runs a reinforcement function recursively of type [reinforce_cmd_type] until
-   player has 0 undeployed troops remaining*)
+   player has 0 undeployed troops remaining *)
 let rec reinforce_type st reinforce_cmd_type rein_type =
   let undeploys = st.player_turn.num_undeployed in if (undeploys = 0) then st
   else if (is_ai st) then let next_string = ai_next_reinforce st in
@@ -312,6 +312,23 @@ let rec get_click_two st clicked1 clicked1string =
   else (update_board_with_click st clicked2 (attack_notification_from st);
         ((clicked2, clicked2string),(clicked1,clicked1string)))
 
+(* Simulates dice roll and returns a tuple that shows who lost how many troops*)
+let roll_dice num_attackers num_defenders =
+  let attack_dice = min (num_attackers-1) 3 in
+  let defend_dice = min (num_defenders) 2 in
+  let rolls = (roll attack_dice, roll defend_dice) in
+  update_dice (fst rolls) ((snd rolls));
+  let attack_max = find_max (fst rolls) in
+  let attack_2nd_max = find_2nd_max (fst rolls) in
+  let defend_max = find_max (snd rolls) in
+  let defend_2nd_max = find_2nd_max (snd rolls) in
+  if (attack_dice > 1 && defend_dice > 1) then
+    (if (attack_max > defend_max && attack_2nd_max > defend_2nd_max)
+     then (Right, -2) else if
+       (attack_max <= defend_max && attack_2nd_max <=  defend_2nd_max)
+     then (Left, -2) else (Both, -1))
+  else (if (attack_max > defend_max) then (Right, -1) else (Left, -1))
+
 
 (* [attack_loop st] is a loop that keeps running while the player is attacking
    another player in environment [st], returns a new state when the user
@@ -327,20 +344,7 @@ let rec attack_loop st = Random.init (int_of_float (Unix.time ()));
       update_board_with_click st (Pytuple [Pystr next_defender; Pybool true])
         (attack_notification_to st);
       let num_defenders = get_num_troops next_defender st.occupied_countries in
-      let attack_dice = min (num_attackers-1) 3 in
-      let defend_dice = min (num_defenders) 2 in
-      let rolls = (roll attack_dice, roll defend_dice) in
-      update_dice (fst rolls) ((snd rolls));
-      let attack_max = find_max (fst rolls) in
-      let attack_2nd_max = find_2nd_max (fst rolls) in
-      let defend_max = find_max (snd rolls) in
-      let defend_2nd_max = find_2nd_max (snd rolls) in
-      let loser_lost = if (attack_dice > 1 && defend_dice > 1) then
-          (if (attack_max > defend_max && attack_2nd_max > defend_2nd_max)
-           then (Right, -2) else if
-             (attack_max <= defend_max && attack_2nd_max <=  defend_2nd_max)
-           then (Left, -2) else (Both, -1))
-        else (if (attack_max > defend_max) then (Right, -1) else (Left, -1)) in
+      let loser_lost = roll_dice num_attackers num_defenders in
       let cmd = make_attack_command next_attack next_defender
           (fst loser_lost) (snd loser_lost) st in
       let st2 = attack cmd st in
@@ -384,22 +388,8 @@ let rec attack_loop st = Random.init (int_of_float (Unix.time ()));
                 get_num_troops clicked1string st.occupied_countries in
            let num_defenders=get_num_troops clicked2string st.occupied_countries
            in if (num_attackers < 2) then attack_loop st else
-             (let attack_dice = min (num_attackers-1) 3 in
-              let defend_dice = min (num_defenders) 2 in
-              let rolls = (roll attack_dice, roll defend_dice) in
-              update_dice (fst rolls) ((snd rolls));
-              let attack_max = find_max (fst rolls) in
-              let attack_2nd_max = find_2nd_max (fst rolls) in
-              let defend_max = find_max (snd rolls) in
-              let defend_2nd_max = find_2nd_max (snd rolls) in
-              let loser_lost = if (attack_dice > 1 && defend_dice > 1) then
-                  (if (attack_max>defend_max && attack_2nd_max>defend_2nd_max)
-                   then (Right, -2) else if
-                     (attack_max <= defend_max &&
-                      attack_2nd_max <= defend_2nd_max) then (Left, -2)
-                   else (Both, -1)) else
-                  (if (attack_max>defend_max) then (Right,-1) else (Left,-1))
-              in let cmd = make_attack_command (string_of_clicked clicked1)
+             (let loser_lost = roll_dice num_attackers num_defenders in
+              let cmd = make_attack_command (string_of_clicked clicked1)
                      (string_of_clicked clicked2) (fst loser_lost)
                      (snd loser_lost) st in let st2 = attack cmd st in
               (if (num_countries st2.player_turn st2.occupied_countries 0 >
