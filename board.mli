@@ -26,8 +26,8 @@ type player = {
   num_deployed: int;
   num_undeployed: int;
   cards: card list;
-  score: int;
-  ai: bool
+  ai: bool;
+  ratio: float
 }
 
 (* A [board] is a graph of countries where countries that border each other are
@@ -35,3 +35,11 @@ type player = {
 type board = continent list
 
 val graphboard : board
+
+val p1: player
+
+val p2: player
+
+val p3: player
+
+val p4: player

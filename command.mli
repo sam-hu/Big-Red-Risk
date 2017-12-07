@@ -1,49 +1,24 @@
 open Board
 
-(*[point] is a point on the users screen *)
-(* type point *)
-
-(* [command] represents a command input by a player. *)
-type loser = Left|Right|Both
-
-type attack_command = FalseAttack | Attack of (string*string*loser*int)
-
-type reinforce_command = FalseReinforce | Reinforce of string
-
-type fortify_command = FalseFortify | Fortify of string
-
+(*[trade_command] is NoTrade if the player cannot trade in any cards, Same c
+  if the player can trade in 3 cards of type [c], or Different if the player
+  can trade in 3 cards of different types *)
 type trade_command = NoTrade | Same of card | Different
 
-type pass_command = unit
+(*[reinforce_command] is FalseReinforce if the player cannot reinforce, or
+  Reinforce s if the player can reinforce the country with country_id [s]*)
+type reinforce_command = FalseReinforce | Reinforce of string
 
-(* [parse point1 point2 str1] is the command that represents player input
-   [point1] [point2] [str1]
- * requires: [point1] and [point2] are points on the gui, str1 is a string
-   describing the type of command*)
-(* val parse : point -> point -> string -> command *)
+(*[loser] is Left if the the attacking country loses the battle, Right if the
+  defending country loses the battle, or Both if there is a draw *)
+type loser = Left|Right|Both
 
+(*[attack_command] is FalseAttack if the player cannot attack, or
+  Attack (s1, s2, l, i) if country [s1] attacked country [s2], with l being
+  Left if [s1] lost, Right if [s2] lost, or Both if both countries lost, and i
+  being the number of troops the loser(s) lost as a result of the battle *)
+type attack_command = FalseAttack | Attack of (string*string*loser*int)
 
-(* [makeAttackCommand point1 point2] creates a attack command
- * requires: [point1] and [point2] are points. *)
-(* val make_attack_command: point -> point -> attack_command *)
-
-(* [makeReinforceCommand point1] creates a reinforce command
- * requires: [point1] is a point. *)
-(* val make_reinforce_command: point -> reinforce_command *)
-
-(* [makeFortifyCommand point1 point2] creates a reinforce command
- * requires: [point1] and [point2] are points. *)
-(* val make_fortify_command: point -> point -> fortify_command *)
-
-(* [makeTradeInCommand] creates a trade-in command  *)
-(* val make_trade_command:  trade_command *)
-
-(* [makePassCommand str] creates a pass command  *)
-(* val make_pass_command: pass_command *)
-
-(* [makeCommand point1 point2 str1] creates one of the 5 valid commands or a false command
- * requires: [point1] and [point2] are point, and [str1] is a string *)
-(* val make_command: point -> point -> string -> command *)
-
-(* [falseCommand] creates a false command  *)
-(* val false_command: command *)
+(*[fortify_command] is FalseFortify if the player cannot fortify, or Fortify s
+  if the player can fortify the country with country_id [s] *)
+type fortify_command = FalseFortify | Fortify of string

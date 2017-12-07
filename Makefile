@@ -3,10 +3,6 @@ test:
 
 play:
 	ocamlbuild -use-ocamlfind -pkgs lymp -tag thread simple.native && ./simple.native
-	#ocamlbuild -use-ocamlfind main.byte && ./main.byte
-
-check:
-	bash checkenv.sh && bash checktypes.sh
 
 zip:
 	zip a2src.zip *.ml* *.json

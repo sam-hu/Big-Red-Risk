@@ -168,7 +168,6 @@ let tests =[
                                                 ("room1", "red hat");
                                                 ("room1", "black hat")]
                             (j |> init_state |> locations));
-
   (* tests init_state function to see if all values are initialized properly for "oneroom.json"*)
   "2: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> win_score));
   "2: start_score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> score));
@@ -177,7 +176,6 @@ let tests =[
   "2: start_inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> inv));
   "2: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> visited));
   "2: start_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> locations));
-
   (* tests init_state function to see if all values are initialized properly for "GameOfThronesAdventure.json"*)
   "3: max" >:: (fun _ -> assert_equal 72650 (gotj |> init_state |> win_score));
   "3: start_score" >:: (fun _ -> assert_equal 0 (gotj |> init_state |> score));
@@ -192,7 +190,6 @@ let tests =[
                     ("stony shore", "gold"); ("stony shore", "warriors");
                     ("castle black", "john snow"); ("winterfell", "whitewalker scroll");
                     ("winterfell", "sword")] (gotj |> init_state |> locations));
-
   (* tests the effects of the quit commmand on "oneroom.json"*)
   "4: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' quitCommand |> win_score));
   "4: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' quitCommand |> score));
@@ -201,7 +198,6 @@ let tests =[
   "4: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' quitCommand |> inv));
   "4: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' quitCommand |> visited));
   "4: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' quitCommand |> locations));
-
   (* tests the effects of the look commmand on "oneroom.json"*)
   "5: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' lookCommand |> win_score));
   "5: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' lookCommand |> score));
@@ -210,7 +206,6 @@ let tests =[
   "5: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' lookCommand |> inv));
   "5: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' lookCommand |> visited));
   "5: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' lookCommand |> locations));
-
   (* tests the effects of the score commmand on "oneroom.json"*)
   "5b: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' scoreCommand |> win_score));
   "5b: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' scoreCommand |> score));
@@ -219,7 +214,6 @@ let tests =[
   "5b: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' scoreCommand |> inv));
   "5b: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' scoreCommand |> visited));
   "5b: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' scoreCommand |> locations));
-
   (* tests the effects of the turns commmand on "oneroom.json"*)
   "5c: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' turnsCommand |> win_score));
   "5c: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' turnsCommand |> score));
@@ -228,7 +222,6 @@ let tests =[
   "5c: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' turnsCommand |> inv));
   "5c: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' turnsCommand |> visited));
   "5c: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' turnsCommand |> locations));
-
   (* tests the effects of an invalid command on "oneroom.json"*)
   "5d: max" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' invalidCommand |> win_score));
   "5d: score" >:: (fun _ -> assert_equal 110 (j2 |> init_state |> do' invalidCommand |> score));
@@ -237,7 +230,6 @@ let tests =[
   "5d: inv" >:: (fun _ -> assert_equal [] (j2 |> init_state |> do' invalidCommand |> inv));
   "5d: rooms_visited" >:: (fun _ -> assert_equal ["room1"] (j2 |> init_state |> do' invalidCommand |> visited));
   "5d: item_locations" >:: (fun _ -> assert_equal [("room1", "item1")] (j2 |> init_state |> do' invalidCommand |> locations));
-
   (* tests the effects of the inv commmand on "threerooms.json"*)
   "6: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' invCommand |> win_score));
   "6: score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> do' invCommand |> score));
@@ -249,7 +241,6 @@ let tests =[
                                                 ("room1", "red hat");
                                                 ("room1", "black hat")]
                                (j |> init_state |> do' invCommand |> locations));
-
   (* tests the effects of "take black hat" commmand on "threerooms.json"*)
   "7: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' takeCommand |> win_score));
   "7: score" >:: (fun _ -> assert_equal 10001 (j |> init_state |> do' takeCommand |> score));
@@ -260,7 +251,6 @@ let tests =[
   "7: item_locations" >:: (fun _ -> assert_equal [("room2", "key");
                                                 ("room1", "red hat");]
                               (j |> init_state |> do' takeCommand |> locations));
-
   (* tests the effects of "drop white hat" commmand on "threerooms.json"*)
   "8: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' dropCommand |> win_score));
   "8: score" >:: (fun _ -> assert_equal 11001 (j |> init_state |> do' dropCommand |> score));
@@ -273,7 +263,6 @@ let tests =[
                                                   ("room1", "black hat");
                                                  ("room1","white hat")]
                               (j |> init_state |> do' dropCommand |> locations));
-
   (* tests the effects of "go room2" commmand on "threerooms.json"*)
   "9: max" >:: (fun _ -> assert_equal 11111 (j |> init_state |> do' goCommand |> win_score));
   "9: score" >:: (fun _ -> assert_equal 10011 (j |> init_state |> do' goCommand |> score));

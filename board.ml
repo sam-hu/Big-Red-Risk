@@ -10,8 +10,8 @@ type player = {
   num_deployed: int;
   num_undeployed: int;
   cards: card list;
-  score: int;
-  ai: bool
+  ai: bool;
+  ratio: float
 }
 
 type continent = {
@@ -21,6 +21,42 @@ type continent = {
 }
 
 type board = continent list
+
+let p1 = {
+  player_id = "Player one";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  ai = false;
+  ratio = 0.0
+}
+
+let p2 = {
+  player_id = "Player two";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  ai = false;
+  ratio = 0.0
+}
+
+let p3 = {
+  player_id = "Player three";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  ai = false;
+  ratio = 0.0
+}
+
+let p4 = {
+  player_id = "Player four";
+  num_deployed = 0;
+  num_undeployed = 0;
+  cards = [];
+  ai = false;
+  ratio = 0.0
+}
 
 
 let becker = {
@@ -55,7 +91,7 @@ let morrill = {
 
 let uris = {
   country_id = "Uris";
-  bordering_countries = ["Bethe";"Morrill";"Olin"]
+  bordering_countries = ["Bethe";"Morrill";"Olin"; "Sibley"]
 }
 
 let tjaden = {
@@ -153,25 +189,25 @@ let west = {
 let central = {
   countries = [uris; tjaden; morrill; sibley; goldwin; klarman; olin];
   id = "Central Campus";
-  bonus = 5;
+  bonus = 8;
 }
 
 let north = {
   countries = [townhouses; donlon; rpcc; lowrise; appel];
   id = "North Campus";
-  bonus = 5;
+  bonus = 6;
 }
 
 let ag_quad = {
   countries = [mann; dairy; riley; gates];
   id = "Ag. Quad";
-  bonus = 5;
+  bonus = 4;
 }
 
 let collegetown = {
   countries = [cascadilla; sheldon; schwartz];
   id = "Collegetown";
-  bonus = 5;
+  bonus = 3;
 }
 
 let graphboard = [west; north; central; ag_quad; collegetown]
