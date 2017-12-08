@@ -12,8 +12,8 @@ following link:
 
   https://github.com/dbousque/lymp
 
-To install Lymp, you must have python 2 or 3 installed on your machine.
-Then, run the following command on your terminal:
+To use Lymp, you must have OCaml as well as Python 2 or 3 installed on your 
+machine. Run the following command on your terminal to install Lymp:
 ```
   opam update && opam install lymp
 ```
